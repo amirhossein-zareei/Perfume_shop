@@ -44,4 +44,6 @@ brandSchema.pre("save", function (next) {
   next();
 });
 
+brandSchema.index({ slug: 1 }, { unique: true });
+
 module.exports = model("Brand", brandSchema);

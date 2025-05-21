@@ -38,6 +38,8 @@ const categorySchema = new Schema(
   { timestamps: true }
 );
 
+categorySchema.index({ slug: 1 }, { unique: true });
+
 categorySchema.pre("save", function (next) {
   if (this.name && !this.slug) {
     this.slug = slugify(this.name, { lower: true });
