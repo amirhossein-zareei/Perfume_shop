@@ -12,7 +12,6 @@ const stateSchema = new Schema({
     trim: true,
     required: true,
   },
-
 });
 
 //* City Model
@@ -31,15 +30,17 @@ const citySchema = new Schema({
 
   latitude: {
     type: Number,
+    required: true,
   },
 
   longitude: {
     type: Number,
+    required: true,
   },
 });
 
 citySchema.index({ name: 1, stateId: 1 }, { unique: true });
-
+citySchema.index({ name: 1 });
 const State = model("State", stateSchema);
 
 const City = model("City", citySchema);

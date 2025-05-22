@@ -18,4 +18,6 @@ const cartSchema = new Schema(
   { timestamps: true }
 );
 
+cartSchema.index({ UserId: 1 });
+
 module.exports = model("Cart", cartSchema);

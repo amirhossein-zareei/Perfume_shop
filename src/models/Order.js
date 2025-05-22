@@ -74,5 +74,6 @@ orderSchema.set("toJSON", { virtuals: true });
 orderSchema.set("toObject", { virtuals: true });
 
 orderSchema.index({ userId: 1 });
+orderSchema.index({ paymentMethod: 1 });
 
 module.exports = model("Order", orderSchema);
