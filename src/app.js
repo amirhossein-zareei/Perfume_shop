@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 
-const errorHandler = require("./middlewares/errorHandler");
+const errorHandler = require("./middlewares/errorHandlerMiddleware");
+const AppError = require("./utils/AppError");
 
 const app = express();
 
@@ -10,6 +11,12 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 app.use(cors());
 
-app.use(errorHandler)
+//* 404 Handler
+app.use((req, res, next) => {
+  next(new AppError(`Cannot find ${req.originalUrl} on this server!`, 404));
+});
+
+//* Error Handler
+app.use(errorHandler);
 
 module.exports = app;
