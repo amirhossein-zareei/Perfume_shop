@@ -22,6 +22,12 @@ const userSchema = new Schema(
       select: false,
     },
 
+    role: {
+      type: String,
+      enum: ["ADMIN", "USER"],
+      required: true,
+    },
+
     authType: {
       type: String,
       enum: ["email", "google"],
