@@ -1,7 +1,7 @@
 const { createLogger, format, transports } = require("winston");
 const path = require("path");
 
-const { app } = require("./env");
+const { app } = require("../config/env");
 
 const isProduction = app.mode === "production";
 

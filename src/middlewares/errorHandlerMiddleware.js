@@ -1,5 +1,4 @@
-const logger = require("../config/logger");
-const AppError = require("../utils/AppError");
+const logger = require("../utils/logger");
 const { app } = require("../config/env");
 
 module.exports = (err, req, res, next) => {
@@ -34,5 +33,5 @@ module.exports = (err, req, res, next) => {
     response.stack = err.stack;
   }
 
-  res.status(statusCode).json(response);
+ return res.status(statusCode).json(response);
 };
