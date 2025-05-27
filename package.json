@@ -21,6 +21,7 @@
     "joi": "^17.13.3",
     "mongodb": "^6.16.0",
     "mongoose": "^8.14.3",
+    "nodemailer": "^7.0.3",
     "slugify": "^1.6.6",
     "winston": "^3.17.0"
   },
