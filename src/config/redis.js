@@ -21,4 +21,7 @@ const connectRedis = async () => {
   }
 };
 
-module.exports = connectRedis;
+module.exports = {
+  connectRedis,
+  Redis: client,
+};

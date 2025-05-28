@@ -1,5 +1,8 @@
+const { connectRedis, Redis } = require("./redis");
+
 module.exports = {
   connectMongoDB: require("./mongoDB"),
-  connectRedis: require("./redis"),
+  connectRedis,
+  Redis,
   env: require("./env"),
 };
