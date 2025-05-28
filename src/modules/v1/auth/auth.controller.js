@@ -2,11 +2,25 @@ const { User } = require("../../../models/index");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
+const { generateCaptcha, verifyCaptcha } = require("../../../utils/captcha");
 
 const findUserByEmail = async (email) => {
   const userFound = await User.findOne({ email });
 
   return userFound;
+};
+
+exports.getCaptcha = async (req, res, next) => {
+  try {
+    const { captcha, uuid } = await generateCaptcha();
+
+    return sendSuccess(res, "Captcha generated successfully", {
+      uuid,
+      captcha,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 exports.register = async (req, res, next) => {
