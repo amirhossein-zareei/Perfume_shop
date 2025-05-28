@@ -4,10 +4,18 @@ const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
 const { generateCaptcha, verifyCaptcha } = require("../../../utils/captcha");
 
-const findUserByEmail = async (email) => {
+const _findUserByEmail = async (email) => {
   const userFound = await User.findOne({ email });
 
   return userFound;
+};
+
+const _handleCaptchaValidation = async (uuid, captcha) => {
+  const isCaptchaValid = await verifyCaptcha(uuid, captcha);
+
+  if (!isCaptchaValid) {
+    throw new AppError("Invalid CAPTCHA, Please try again", 400);
+  }
 };
 
 exports.getCaptcha = async (req, res, next) => {
@@ -25,7 +33,9 @@ exports.getCaptcha = async (req, res, next) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, captcha, uuid } = req.body;
+
+    await _handleCaptchaValidation(uuid, captcha);
 
     const user = await findUserByEmail(email);
 
