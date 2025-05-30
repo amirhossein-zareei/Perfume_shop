@@ -1,7 +1,7 @@
 const svgCaptcha = require("svg-captcha");
 const uuidv4 = require("uuid").v4;
 
-const { setCode, getCode, deleteCode } = require("./redisCode");
+const { setCode, getCode, deleteCode } = require("../utils/redisCode");
 
 exports.generateCaptcha = async () => {
   try {

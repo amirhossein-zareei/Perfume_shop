@@ -9,5 +9,5 @@ exports.getCode = async (key) => {
 };
 
 exports.deleteCode = async (key) => {
-  await Redis.del(key);
+  return await Redis.del(key);
 };
