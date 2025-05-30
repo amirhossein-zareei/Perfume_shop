@@ -1,8 +1,14 @@
+const bcrypt = require("bcrypt");
+
 const { User } = require("../../../models/index");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
-const { generateCaptcha, verifyCaptcha } = require("../../../utils/captcha");
+const { generateCaptcha, verifyCaptcha } = require("../../../services/captcha");
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require("../../../services/tokenService");
 
 const _findUserByEmail = async (email) => {
   const userFound = await User.findOne({ email });
@@ -37,7 +43,7 @@ exports.register = async (req, res, next) => {
 
     await _handleCaptchaValidation(uuid, captcha);
 
-    const user = await findUserByEmail(email);
+    const user = await _findUserByEmail(email);
 
     if (user) {
       throw new AppError("Email is already registered", 409);
@@ -63,6 +69,37 @@ exports.register = async (req, res, next) => {
     });
 
     return sendSuccess(res, "User registered successfully", userToSend, 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password, captcha, uuid } = req.body;
+
+    await _handleCaptchaValidation(uuid, captcha);
+
+    const user = await _findUserByEmail(email);
+
+    if (!user) {
+      throw new AppError("Invalid email or password", 401);
+    }
+
+    if (user.isBanned) {
+      throw new AppError("Your account has been suspended.", 403);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new AppError("Invalid email or password", 401);
+    }
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user._id);
+
+    return sendSuccess(res, "Login successfully", { accessToken, refreshToken });
   } catch (err) {
     next(err);
   }
