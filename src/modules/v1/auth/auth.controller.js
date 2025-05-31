@@ -4,6 +4,7 @@ const { User } = require("../../../models/index");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
+const { app, auth } = require("../../../config/env");
 const {
   generateCaptcha,
   verifyCaptcha,
@@ -102,11 +103,19 @@ exports.login = async (req, res, next) => {
     }
 
     const accessToken = generateAccessToken(user);
-    const refreshToken = await generateRefreshToken(user._id);
+    const refreshToken = await generateRefreshToken(user._id); //!
 
-    return sendSuccess(res, "Login successfully", {
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: app.mode === "production",
+      sameSite: "Strict",
+      maxAge: auth.refreshTokenExpiresIn * 24 * 60 * 60 * 1000,
+    });
+
+    return sendSuccess(res, "Login successful", {
+      id: user._id,
+      name: user.name,
       accessToken,
-      refreshToken,
     });
   } catch (err) {
     next(err);
@@ -132,4 +141,18 @@ exports.getMe = (req, res, next) => {
   const user = req.user;
 
   return sendSuccess(res, "User profile retrieved successfully.", user);
+};
+
+exports.refreshToken = async (req, res, next) => {
+  try {
+    const refreshTokenFromCookie = req.cookies.refreshToken;
+
+    if (!refreshTokenFromCookie) {
+      throw new AppError("Refresh token not found in cookies.", 401);
+    }
+
+    const 
+  } catch (err) {
+    next(err);
+  }
 };

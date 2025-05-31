@@ -90,6 +90,7 @@ exports.verifyAccessToken = async (token) => {
 
 exports.verifyRefreshToken = async (token, userId) => {
   try {
+    //! باید بی‌نیاز از ایدی بشه تا بتونیم راحت تر کار کنیم باهاش این مدلی به مشکل میخوریم و نمیشه که بشه
     const storedHashedRefreshToken = await getCode(`refreshToken:${userId}`);
 
     if (!storedHashedRefreshToken) {
@@ -110,15 +111,6 @@ exports.verifyRefreshToken = async (token, userId) => {
 
     try {
       const payload = jwt.verify(token, auth.refreshTokenSecretKey);
-
-      if (payload.id !== userId.toString()) {
-        await deleteCode(`refreshToken:${userId}`);
-
-        throw new AppError(
-          "Refresh token user mismatch. Please log in again.",
-          401
-        );
-      }
 
       return payload;
     } catch (error) {
