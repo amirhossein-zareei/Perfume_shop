@@ -63,7 +63,7 @@ exports.generateRefreshToken = async (userId) => {
 };
 
 //---Token Validation---
-exports.verifyAccessToken = async (token, userId) => {
+exports.verifyAccessToken = async (token) => {
   try {
     const jti = _getJtiFromToken(token);
 
@@ -75,13 +75,6 @@ exports.verifyAccessToken = async (token, userId) => {
 
     try {
       const payload = jwt.verify(token, auth.accessTokenSecretKey);
-
-      if (payload.id.toString() !== userId.toString()) {
-        throw new AppError(
-          "Access token does not match the expected user.",
-          403
-        );
-      }
 
       return payload;
     } catch (error) {
@@ -170,11 +163,7 @@ exports.blocklistAccessToken = async (token) => {
       return true;
     }
 
-    await setCode(
-      `blocklist:access:${jti}`,
-      true,
-      auth.accessTokenExpiresIn
-    );
+    await setCode(`blocklist:access:${jti}`, true, auth.accessTokenExpiresIn);
 
     return true;
   } catch (err) {
