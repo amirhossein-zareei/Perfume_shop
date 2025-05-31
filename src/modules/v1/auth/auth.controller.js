@@ -4,10 +4,15 @@ const { User } = require("../../../models/index");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
-const { generateCaptcha, verifyCaptcha } = require("../../../services/captcha");
+const {
+  generateCaptcha,
+  verifyCaptcha,
+} = require("../../../services/captchaService");
 const {
   generateAccessToken,
   generateRefreshToken,
+  blocklistAccessToken,
+  revokeRefreshToken,
 } = require("../../../services/tokenService");
 
 const _findUserByEmail = async (email) => {
@@ -99,7 +104,25 @@ exports.login = async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user._id);
 
-    return sendSuccess(res, "Login successfully", { accessToken, refreshToken });
+    return sendSuccess(res, "Login successfully", {
+      accessToken,
+      refreshToken,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.logout = async (req, res, next) => {
+  try {
+    const { accessToken } = req;
+
+    await Promise.all([
+      blocklistAccessToken(accessToken),
+      revokeRefreshToken(req.user._id),
+    ]);
+
+    return sendSuccess(res, "Successfully logged out.");
   } catch (err) {
     next(err);
   }
