@@ -15,9 +15,16 @@ exports.auth = async (req, res, next) => {
 
     const accessTokenValue = authHeader.split(" ")[1];
 
-    const payload = verifyAccessToken(accessTokenValue);
+    const payload = await verifyAccessToken(accessTokenValue);
 
     const userId = payload.id;
+
+    if (!userId) {
+      throw new AppError(
+        "Provided token is incomplete for authentication.",
+        401
+      );
+    }
 
     const user = await User.findById(userId).lean();
 

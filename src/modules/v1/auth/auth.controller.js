@@ -85,7 +85,7 @@ exports.login = async (req, res, next) => {
 
     await _handleCaptchaValidation(uuid, captcha);
 
-    const user = await _findUserByEmail(email);
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       throw new AppError("Invalid email or password", 401);
@@ -126,4 +126,10 @@ exports.logout = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+exports.getMe = (req, res, next) => {
+  const user = req.user;
+
+  return sendSuccess(res, "User profile retrieved successfully.", user);
 };
