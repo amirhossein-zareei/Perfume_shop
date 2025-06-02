@@ -19,6 +19,14 @@ const _getJtiFromToken = (token) => {
   return decodedToken.jti;
 };
 
+const _verifyTokenAndGetPayload = (token, secretKey) => {
+  try {
+    return jwt.verify(token, secretKey);
+  } catch (err) {
+    throw new AppError("Invalid or expired token. Authentication failed.", 401);
+  }
+};
+
 //---Token Generation---
 exports.generateAccessToken = (user) => {
   try {
@@ -40,21 +48,21 @@ exports.generateAccessToken = (user) => {
 
 exports.generateRefreshToken = async (userId) => {
   try {
+    const jti = uuidv4();
     const currentUserId = userId.toString();
 
     const refreshToken = jwt.sign(
       {
         id: currentUserId,
+        jti,
       },
       auth.refreshTokenSecretKey,
       { expiresIn: auth.refreshTokenExpiresIn + "d" }
     );
 
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-
     const expires = auth.refreshTokenExpiresIn * 24 * 60;
 
-    await setCode(`refreshToken:${currentUserId}`, hashedRefreshToken, expires);
+    await setCode(`refreshToken:${jti}`, currentUserId, expires);
 
     return refreshToken;
   } catch (err) {
@@ -73,69 +81,55 @@ exports.verifyAccessToken = async (token) => {
       throw new AppError("Access denied. Token is invalid or revoked.", 401);
     }
 
-    try {
-      const payload = jwt.verify(token, auth.accessTokenSecretKey);
+    const payload = _verifyTokenAndGetPayload(token, auth.accessTokenSecretKey);
 
-      return payload;
-    } catch (error) {
-      throw new AppError(
-        "Invalid or expired token. Authentication failed.",
-        401
-      );
-    }
+    return payload;
   } catch (err) {
     throw err;
   }
 };
 
-exports.verifyRefreshToken = async (token, userId) => {
+exports.verifyRefreshToken = async (token) => {
   try {
-    const storedHashedRefreshToken = await getCode(`refreshToken:${userId}`);
+    const payload = _verifyTokenAndGetPayload(
+      token,
+      auth.refreshTokenSecretKey
+    );
 
-    if (!storedHashedRefreshToken) {
+    if (!payload.jti) {
+      throw new AppError("Malformed token payload.", 400);
+    }
+
+    const redisKey = `refreshToken:${payload.jti}`;
+    const storedSessionInfo = await getCode(redisKey);
+
+    if (!storedSessionInfo) {
       throw new AppError(
         "Session invalid or expired. Please log in again.",
         401
       );
     }
 
-    const isTokenMatch = await bcrypt.compare(token, storedHashedRefreshToken);
-
-    if (!isTokenMatch) {
-      throw new AppError(
-        "Session invalid or expired. Please log in again.",
-        401
-      );
-    }
-
-    try {
-      const payload = jwt.verify(token, auth.refreshTokenSecretKey);
-
-      if (payload.id !== userId.toString()) {
-        await deleteCode(`refreshToken:${userId}`);
-
-        throw new AppError(
-          "Refresh token user mismatch. Please log in again.",
-          401
-        );
-      }
-
-      return payload;
-    } catch (error) {
-      throw new AppError(
-        "Invalid or expired token. Authentication failed.",
-        401
-      );
-    }
+    return payload.id;
   } catch (err) {
     throw err;
   }
 };
 
 //---Token Revocation---
-exports.revokeRefreshToken = async (userId) => {
+exports.revokeRefreshToken = async (token) => {
   try {
-    const deletedRefreshToken = await deleteCode(`refreshToken:${userId}`);
+    const payload = _verifyTokenAndGetPayload(
+      token,
+      auth.refreshTokenSecretKey
+    );
+
+    if (!payload.jti) {
+      throw new AppError("Malformed token payload.", 400);
+    }
+
+    const redisKey = `refreshToken:${payload.jti}`;
+    const deletedRefreshToken = await deleteCode(redisKey);
 
     if (!deletedRefreshToken) {
       throw new AppError("Refresh token not found or already inactive.", 400);
@@ -159,7 +153,11 @@ exports.blocklistAccessToken = async (token) => {
 
     try {
       jwt.verify(token, auth.accessTokenSecretKey);
-    } catch (error) {
+    } catch (err) {
+      if (err.name !== "TokenExpiredError") {
+        throw new AppError("Invalid or malformed access token.", 401);
+      }
+
       return true;
     }
 
