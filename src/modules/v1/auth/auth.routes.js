@@ -9,6 +9,7 @@ const {
   login,
   logout,
   getMe,
+  refreshToken,
 } = require("./auth.controller");
 
 const router = Router();
@@ -19,5 +20,7 @@ router.post("/register", validate(registerValidation), register);
 router.post("/login", validate(loginValidation), login);
 router.post("/logout", auth, logout);
 router.get("/me", auth, getMe);
+
+router.post("/refresh-token", auth, refreshToken)
 
 module.exports = router;

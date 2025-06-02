@@ -4,6 +4,7 @@ const { User } = require("../../../models/index");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
+const { app, auth } = require("../../../config/env");
 const {
   generateCaptcha,
   verifyCaptcha,
@@ -13,14 +14,10 @@ const {
   generateRefreshToken,
   blocklistAccessToken,
   revokeRefreshToken,
+  verifyRefreshToken,
 } = require("../../../services/tokenService");
 
-const _findUserByEmail = async (email) => {
-  const userFound = await User.findOne({ email });
-
-  return userFound;
-};
-
+//---- Helper Function ----
 const _handleCaptchaValidation = async (uuid, captcha) => {
   const isCaptchaValid = await verifyCaptcha(uuid, captcha);
 
@@ -29,6 +26,35 @@ const _handleCaptchaValidation = async (uuid, captcha) => {
   }
 };
 
+const _setRefreshTokenCookie = (res, refreshToken) => {
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: app.mode === "production",
+    sameSite: "Strict",
+    maxAge: auth.refreshTokenExpiresIn * 24 * 60 * 60 * 1000,
+  });
+};
+
+const _clearRefreshTokenCookie = (res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: app.mode === "production",
+    sameSite: "Strict",
+  });
+};
+
+const _getAndValidateRefreshTokenCookie = (req) => {
+  const refreshTokenFromCookie = req.cookies.refreshToken;
+  if (!refreshTokenFromCookie) {
+    throw new AppError(
+      "Refresh token not found in cookies. Please log in.",
+      401
+    );
+  }
+  return refreshTokenFromCookie;
+};
+
+//---- Exported Controller Actions ----
 exports.getCaptcha = async (req, res, next) => {
   try {
     const { captcha, uuid } = await generateCaptcha();
@@ -48,7 +74,7 @@ exports.register = async (req, res, next) => {
 
     await _handleCaptchaValidation(uuid, captcha);
 
-    const user = await _findUserByEmail(email);
+    const user = await User.exists({ email });
 
     if (user) {
       throw new AppError("Email is already registered", 409);
@@ -104,9 +130,12 @@ exports.login = async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = await generateRefreshToken(user._id);
 
-    return sendSuccess(res, "Login successfully", {
+    _setRefreshTokenCookie(res, refreshToken);
+
+    return sendSuccess(res, "Login successful", {
+      id: user._id,
+      name: user.name,
       accessToken,
-      refreshToken,
     });
   } catch (err) {
     next(err);
@@ -117,9 +146,13 @@ exports.logout = async (req, res, next) => {
   try {
     const { accessToken } = req;
 
+    const refreshTokenFromCookie = _getAndValidateRefreshTokenCookie(req);
+
+    _clearRefreshTokenCookie(res);
+
     await Promise.all([
       blocklistAccessToken(accessToken),
-      revokeRefreshToken(req.user._id),
+      revokeRefreshToken(refreshTokenFromCookie),
     ]);
 
     return sendSuccess(res, "Successfully logged out.");
@@ -132,4 +165,31 @@ exports.getMe = (req, res, next) => {
   const user = req.user;
 
   return sendSuccess(res, "User profile retrieved successfully.", user);
+};
+
+exports.refreshToken = async (req, res, next) => {
+  try {
+    const refreshTokenFromCookie = _getAndValidateRefreshTokenCookie(req);
+
+    const userId = await verifyRefreshToken(refreshTokenFromCookie);
+
+    const user = await User.findById(userId).lean();
+
+    if (!user) {
+      throw new AppError("User associated with this token not found.", 403);
+    }
+
+    await revokeRefreshToken(refreshTokenFromCookie);
+    await blocklistAccessToken(req.accessToken);
+
+    const newRefreshToken = await generateRefreshToken(userId);
+
+    const newAccessToken = generateAccessToken(user);
+
+    _setRefreshTokenCookie(res, newRefreshToken);
+
+    return sendSuccess(res, "Tokens refreshed successfully.", newAccessToken);
+  } catch (err) {
+    next(err);
+  }
 };
