@@ -39,7 +39,6 @@ exports.auth = async (req, res, next) => {
       throw new AppError("Access to this account has been suspended.", 403);
     }
 
-    req.accessToken = accessTokenValue;
     req.user = user;
     next();
   } catch (err) {

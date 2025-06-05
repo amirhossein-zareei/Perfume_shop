@@ -179,16 +179,17 @@ exports.refreshToken = async (req, res, next) => {
       throw new AppError("User associated with this token not found.", 403);
     }
 
-    await revokeRefreshToken(refreshTokenFromCookie);
-    await blocklistAccessToken(req.accessToken);
-
     const newRefreshToken = await generateRefreshToken(userId);
 
     const newAccessToken = generateAccessToken(user);
 
     _setRefreshTokenCookie(res, newRefreshToken);
 
-    return sendSuccess(res, "Tokens refreshed successfully.", newAccessToken);
+    await revokeRefreshToken(refreshTokenFromCookie);
+
+    return sendSuccess(res, "Tokens refreshed successfully.", {
+      accessToken: newAccessToken,
+    });
   } catch (err) {
     next(err);
   }
