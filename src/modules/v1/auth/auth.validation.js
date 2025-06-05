@@ -1,5 +1,8 @@
 const joi = require("joi");
 
+const passwordPattern =
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@_#\$!])[A-Za-z\d@_#\$!]{8,64}$/;
+
 const registerValidation = joi
   .object({
     name: joi
@@ -35,7 +38,7 @@ const registerValidation = joi
       .trim()
       .min(8)
       .max(64)
-      .pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@_#\$!])[A-Za-z\d@_#\$!]{8,64}$/)
+      .pattern(passwordPattern)
       .required()
       .messages({
         "string.base": "Password must be a string",
@@ -101,7 +104,7 @@ const loginValidation = joi
       .trim()
       .min(8)
       .max(64)
-      .pattern(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@_#\$!])[A-Za-z\d@_#\$!]{8,64}$/)
+      .pattern(passwordPattern)
       .required()
       .messages({
         "string.base": "Password must be a string",
@@ -140,7 +143,62 @@ const loginValidation = joi
     "any.required": "Request body is required",
   });
 
+const changePasswordValidation = joi
+  .object({
+    oldPassword: joi
+      .string()
+      .trim()
+      .min(8)
+      .max(64)
+      .pattern(passwordPattern)
+      .required()
+      .messages({
+        "string.base": "Old password must be a string",
+        "string.empty": "Old password is required",
+        "string.min": "Old password must be at least 8 characters long",
+        "string.max": "Old password must not exceed 64 characters",
+        "string.pattern.base":
+          "Old password must contain letters, numbers, and at least one special character (@, _, #, $, !)",
+        "any.required": "Old password is required",
+      }),
+
+    newPassword: joi
+      .string()
+      .trim()
+      .min(8)
+      .max(64)
+      .pattern(passwordPattern)
+      .not(joi.ref("oldPassword"))
+      .required()
+      .messages({
+        "string.base": "New password must be a string",
+        "string.empty": "New password is required",
+        "string.min": "New password must be at least 8 characters long",
+        "string.max": "New password must not exceed 64 characters",
+        "string.pattern.base":
+          "New password must contain letters, numbers, and at least one special character (@, _, #, $, !)",
+        "any.invalid": "New password must be different from the old password",
+        "any.required": "New password is required",
+      }),
+
+    confirmPassword: joi
+      .string()
+      .equal(joi.ref("newPassword"))
+      .required()
+      .messages({
+        "any.only": "Confirm Password must match Password",
+        "any.required": "Confirm Password is required",
+      }),
+  })
+  .required()
+  .unknown(false)
+  .messages({
+    "object.base": "Request body must be an object",
+    "any.required": "Request body is required",
+  });
+
 module.exports = {
   registerValidation,
   loginValidation,
+  changePasswordValidation,
 };

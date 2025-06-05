@@ -194,3 +194,25 @@ exports.refreshToken = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId).select("+password");
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordMatch) {
+      throw new AppError("The old password you entered incorrect.", 400);
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return sendSuccess(res, "Password changed successfully.");
+  } catch (err) {
+    throw err;
+  }
+};
