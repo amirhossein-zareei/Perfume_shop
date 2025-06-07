@@ -1,10 +1,17 @@
 const joi = require("joi");
 
+const createBaseObjectSchema = (fields) => {
+  return joi.object(fields).required().unknown(false).messages({
+    "object.base": "Request body must be an object",
+    "any.required": "Request body is required",
+  });
+};
+
 const passwordPattern =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@_#\$!])[A-Za-z\d@_#\$!]{8,64}$/;
 
-const registerValidation = joi
-  .object({
+const registerValidation = {
+  body: createBaseObjectSchema({
     name: joi
       .string()
       .trim()
@@ -78,16 +85,11 @@ const registerValidation = joi
       "string.guid": "UUID must be a valid UUID",
       "any.required": "UUID is required",
     }),
-  })
-  .required()
-  .unknown(false)
-  .messages({
-    "object.base": "Request body must be an object",
-    "any.required": "Request body is required",
-  });
+  }),
+};
 
-const loginValidation = joi
-  .object({
+const loginValidation = {
+  body: createBaseObjectSchema({
     email: joi
       .string()
       .email({ minDomainSegments: 2 })
@@ -135,16 +137,11 @@ const loginValidation = joi
       "string.guid": "UUID must be a valid UUID",
       "any.required": "UUID is required",
     }),
-  })
-  .required()
-  .unknown(false)
-  .messages({
-    "object.base": "Request body must be an object",
-    "any.required": "Request body is required",
-  });
+  }),
+};
 
-const changePasswordValidation = joi
-  .object({
+const changePasswordValidation = {
+  body: createBaseObjectSchema({
     oldPassword: joi
       .string()
       .trim()
@@ -189,13 +186,8 @@ const changePasswordValidation = joi
         "any.only": "Confirm Password must match Password",
         "any.required": "Confirm Password is required",
       }),
-  })
-  .required()
-  .unknown(false)
-  .messages({
-    "object.base": "Request body must be an object",
-    "any.required": "Request body is required",
-  });
+  }),
+};
 
 module.exports = {
   registerValidation,
