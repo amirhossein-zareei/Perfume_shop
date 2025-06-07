@@ -168,3 +168,37 @@ exports.blocklistAccessToken = async (token) => {
     throw err;
   }
 };
+
+exports.generatePasswordResetToken = async (userId) => {
+  try {
+    const token = uuidv4();
+
+    await setCode(`resetPassword:${token}`, userId.toString(), 15);
+
+    return token;
+  } catch (err) {
+    throw err;
+  }
+};
+
+exports.verifyPasswordResetToken = async (inputToken) => {
+  try {
+    const userId = await getCode(`resetPassword:${inputToken}`);
+
+    if (!userId) {
+      throw new AppError("Password reset link is invalid or has expired.", 400);
+    }
+
+    return userId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+exports.deletePasswordResetToken = async (token) => {
+  try {
+    await deleteCode(`resetPassword:${token}`);
+  } catch (err) {
+    throw err;
+  }
+};
