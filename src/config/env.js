@@ -4,6 +4,7 @@ module.exports = {
   app: {
     port: process.env.PORT || 4000,
     mode: process.env.MODE || "development",
+    frontendUrl: process.env.FRONTEND_URL,
   },
 
   user: {
