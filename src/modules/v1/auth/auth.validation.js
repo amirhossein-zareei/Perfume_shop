@@ -189,8 +189,63 @@ const changePasswordValidation = {
   }),
 };
 
+const forgotPasswordValidation = {
+  body: createBaseObjectSchema({
+    email: joi
+      .string()
+      .email({ minDomainSegments: 2 })
+      .lowercase()
+      .required()
+      .messages({
+        "string.base": "Email must be a string",
+        "string.empty": "Email is required",
+        "string.email": "Email must be a valid email address",
+        "any.required": "Email is required",
+      }),
+  }),
+};
+
+const resetPasswordValidation = {
+  params: createBaseObjectSchema({
+    token: joi.string().uuid().required().messages({
+      "string.guid": "Reset token is not a valid UUID.",
+      "any.required": "Reset token is required.",
+    }),
+  }),
+
+  body: createBaseObjectSchema({
+    newPassword: joi
+      .string()
+      .trim()
+      .min(8)
+      .max(64)
+      .pattern(passwordPattern)
+      .required()
+      .messages({
+        "string.base": "Password must be a string",
+        "string.empty": "Password is required",
+        "string.min": "Password must be at least 8 characters long",
+        "string.max": "Password must not exceed 64 characters",
+        "string.pattern.base":
+          "Password must contain letters, numbers, and at least one special character (@, _, #, $, !)",
+        "any.required": "Password is required",
+      }),
+
+    confirmPassword: joi
+      .string()
+      .equal(joi.ref("newPassword"))
+      .required()
+      .messages({
+        "any.only": "Confirm Password must match Password",
+        "any.required": "Confirm Password is required",
+      }),
+  }),
+};
+
 module.exports = {
   registerValidation,
   loginValidation,
   changePasswordValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
 };

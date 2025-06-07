@@ -15,7 +15,11 @@ const {
   blocklistAccessToken,
   revokeRefreshToken,
   verifyRefreshToken,
+  generatePasswordResetToken,
+  verifyPasswordResetToken,
+  deletePasswordResetToken,
 } = require("../../../services/tokenService");
+const { sendPasswordRestEmail } = require("../../../services/emailService");
 
 //---- Helper Function ----
 const _handleCaptchaValidation = async (uuid, captcha) => {
@@ -179,6 +183,10 @@ exports.refreshToken = async (req, res, next) => {
       throw new AppError("User associated with this token not found.", 403);
     }
 
+    if (user.isBanned) {
+      throw new AppError("Access to this account has been suspended.", 403);
+    }
+
     const newRefreshToken = await generateRefreshToken(userId);
 
     const newAccessToken = generateAccessToken(user);
@@ -213,6 +221,59 @@ exports.changePassword = async (req, res, next) => {
 
     return sendSuccess(res, "Password changed successfully.");
   } catch (err) {
-    throw err;
+    next(err);
+  }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email }).lean();
+
+    if (user && !user.isBanned) {
+      const resetToken = await generatePasswordResetToken(user._id);
+      const resetUrl = `${app.frontendUrl}/reset-password/${resetToken}`;
+
+      await sendPasswordRestEmail({
+        name: user.name,
+        email: user.email,
+        url: resetUrl,
+      });
+    }
+    return sendSuccess(
+      res,
+      "If an account with that email address exists, a password reset link has been sent."
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const userId = await verifyPasswordResetToken(token);
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new AppError("Password reset link is invalid or has expired.", 400);
+    }
+
+    if (user.isBanned) {
+      throw new AppError("Access to this account has been suspended.", 403);
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    await deletePasswordResetToken(token);
+
+    return sendSuccess(res, "Your password has been reset successfully");
+  } catch (err) {
+    next(err);
   }
 };

@@ -6,6 +6,8 @@ const {
   registerValidation,
   loginValidation,
   changePasswordValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation,
 } = require("./auth.validation");
 const {
   getCaptcha,
@@ -15,6 +17,8 @@ const {
   getMe,
   refreshToken,
   changePassword,
+  forgotPassword,
+  resetPassword,
 } = require("./auth.controller");
 
 const router = Router();
@@ -34,5 +38,14 @@ router.patch(
   validate(changePasswordValidation),
   changePassword
 );
-
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordValidation),
+  forgotPassword
+);
+router.post(
+  "/reset-password/:token",
+  validate(resetPasswordValidation),
+  resetPassword
+);
 module.exports = router;
