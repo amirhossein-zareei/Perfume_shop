@@ -242,10 +242,20 @@ const resetPasswordValidation = {
   }),
 };
 
+const verifyEmailValidation = {
+  params: createBaseObjectSchema({
+    token: joi.string().uuid().required().messages({
+      "string.guid": "Reset token is not a valid UUID.",
+      "any.required": "Reset token is required.",
+    }),
+  }),
+};
+
 module.exports = {
   registerValidation,
   loginValidation,
   changePasswordValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
+  verifyEmailValidation,
 };

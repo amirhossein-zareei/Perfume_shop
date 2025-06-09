@@ -72,16 +72,14 @@ exports.generateRefreshToken = async (userId) => {
 //---Token Validation---
 exports.verifyAccessToken = async (token) => {
   try {
-    const jti = _getJtiFromToken(token);
+    const payload = _verifyTokenAndGetPayload(token, auth.accessTokenSecretKey);
 
-    const blocklistEntry = await getCode(`blocklist:access:${jti}`);
+    const blocklistEntry = await getCode(`blocklist:access:${payload.jti}`);
 
     if (blocklistEntry) {
       throw new AppError("Access denied. Token is invalid or revoked.", 401);
     }
-
-    const payload = _verifyTokenAndGetPayload(token, auth.accessTokenSecretKey);
-
+    
     return payload;
   } catch (err) {
     throw err;
@@ -207,4 +205,10 @@ exports.passwordResetTokenHandler = createOneTimeTokenHandler({
   prefix: "resetPassword",
   ttlInMinutes: 15,
   errorMessage: "Password reset link is invalid or has expired.",
+});
+
+exports.emailVerificationTokenHandler = createOneTimeTokenHandler({
+  prefix: "emailVerification",
+  ttlInMinutes: 15,
+  errorMessage: "Email Verification link is invalid or has expired.",
 });

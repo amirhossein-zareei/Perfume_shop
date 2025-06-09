@@ -8,6 +8,7 @@ const {
   changePasswordValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
+  verifyEmailValidation,
 } = require("./auth.validation");
 const {
   getCaptcha,
@@ -19,6 +20,8 @@ const {
   changePassword,
   forgotPassword,
   resetPassword,
+  resendVerification,
+  verifyEmail,
 } = require("./auth.controller");
 
 const router = Router();
@@ -48,4 +51,12 @@ router.post(
   validate(resetPasswordValidation),
   resetPassword
 );
+
+router.post("/resend-verification", auth, resendVerification);
+router.post(
+  "/verify-email/:token",
+  validate(verifyEmailValidation),
+  verifyEmail
+);
+
 module.exports = router;

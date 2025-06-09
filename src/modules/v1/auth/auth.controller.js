@@ -15,9 +15,13 @@ const {
   blocklistAccessToken,
   revokeRefreshToken,
   verifyRefreshToken,
-  passwordResetTokenHandler
+  passwordResetTokenHandler,
+  emailVerificationTokenHandler,
 } = require("../../../services/tokenService");
-const { sendPasswordRestEmail } = require("../../../services/emailService");
+const {
+  sendPasswordRestEmail,
+  sendVerificationEmail,
+} = require("../../../services/emailService");
 
 //---- Helper Function ----
 const _handleCaptchaValidation = async (uuid, captcha) => {
@@ -271,6 +275,64 @@ exports.resetPassword = async (req, res, next) => {
     await passwordResetTokenHandler.delete(token);
 
     return sendSuccess(res, "Your password has been reset successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.resendVerification = async (req, res, next) => {
+  try {
+    const name = req.user.name;
+    const email = req.user.email;
+    const userId = req.user._id;
+
+    if (req.user.isVerified) {
+      throw new AppError("Your email address has already been verified", 400);
+    }
+
+    const verifyToken = await emailVerificationTokenHandler.generate(userId);
+    const verifyUrl = `${app.frontendUrl}/verify-email/${verifyToken}`;
+
+    await sendVerificationEmail({
+      name,
+      email,
+      url: verifyUrl,
+    });
+
+    return sendSuccess(
+      res,
+      "A new verification link has been sent to your email address."
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    const userId = await emailVerificationTokenHandler.verify(token);
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new AppError(
+        "Email verification link is invalid or has expired.",
+        400
+      );
+    }
+
+    if (user.isBanned) {
+      throw new AppError("Access to this account has been suspended.", 403);
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    await emailVerificationTokenHandler.delete(token);
+
+    return sendSuccess(res, "Your email has been verified successfully");
   } catch (err) {
     next(err);
   }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Reset</title>
+    <title>Email Verification</title>
 </head>
 
 <body style="font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; color: #333;">
@@ -23,20 +23,17 @@
 
                     <tr>
                         <td style="padding: 40px 30px;">
-                            <h2 style="font-size: 20px; margin-top: 0;">Password Reset Request</h2>
+                            <h2 style="font-size: 20px; margin-top: 0;">Verify Your Email Address</h2>
                             <p style="font-size: 16px; line-height: 1.6;">Hello {{name}},</p>
-                            <p style="font-size: 16px; line-height: 1.6;">We received a request to reset the password
-                                for your account. If you did not make this request, you can safely ignore this email. No
-                                changes will be made to your account.</p>
-                            <p style="font-size: 16px; line-height: 1.6;">To set a new password, please click the button
-                                below:</p>
+                            <p style="font-size: 16px; line-height: 1.6;">Thank you for getting started with Perfume
+                                Shop! Please click the button below to verify your email address.</p>
 
                             <table border="0" cellspacing="0" cellpadding="0" style="margin: 30px 0; width: 100%;">
                                 <tr>
                                     <td align="center">
-                                        <a href="{{resetLink}}" target="_blank"
-                                            style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Reset
-                                            Your Password</a>
+                                        <a href="{{verificationLink}}" target="_blank"
+                                            style="display: inline-block; padding: 12px 24px; font-size: 16px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Verify
+                                            Your Email</a>
                                     </td>
                                 </tr>
                             </table>

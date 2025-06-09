@@ -52,14 +52,26 @@ const _sendTemplateEmail = async ({ to, subject, template, replacements }) => {
   }
 };
 
-exports.sendPasswordRestEmail = async ({ name, email, url }) => {
+exports.sendPasswordResetEmail = async ({ name, email, url }) => {
   return _sendTemplateEmail({
     to: email,
     subject: "Reset Your Password for Perfume Shop",
     template: "passwordReset.html",
     replacements: {
-      name: name,
+      name,
       resetLink: url,
+    },
+  });
+};
+
+exports.sendVerificationEmail = async ({ name, email, url }) => {
+  return _sendTemplateEmail({
+    to: email,
+    subject: "Verify Your Email for Perfume Shop",
+    template: "emailVerification.html",
+    replacements: {
+      name,
+      verificationLink: url,
     },
   });
 };
