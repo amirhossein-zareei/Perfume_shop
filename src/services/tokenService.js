@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 
 const { setCode, getCode, deleteCode } = require("../utils/redisCode");
@@ -169,36 +168,43 @@ exports.blocklistAccessToken = async (token) => {
   }
 };
 
-exports.generatePasswordResetToken = async (userId) => {
-  try {
-    const token = uuidv4();
+//--- One-Time Token Handler Factory ---
+const createOneTimeTokenHandler = (option) => {
+  const { prefix, ttlInMinutes, errorMessage } = option;
 
-    await setCode(`resetPassword:${token}`, userId.toString(), 15);
+  const generate = async (value) => {
+    const token = uuidv4();
+    const redisKey = `${prefix}:${token}`;
+
+    await setCode(redisKey, value.toString(), ttlInMinutes);
 
     return token;
-  } catch (err) {
-    throw err;
-  }
-};
+  };
 
-exports.verifyPasswordResetToken = async (inputToken) => {
-  try {
-    const userId = await getCode(`resetPassword:${inputToken}`);
+  const verify = async (token) => {
+    const redisKey = `${prefix}:${token}`;
 
-    if (!userId) {
-      throw new AppError("Password reset link is invalid or has expired.", 400);
+    const value = await getCode(redisKey);
+
+    if (!value) {
+      throw new AppError(errorMessage, 400);
     }
 
-    return userId;
-  } catch (err) {
-    throw err;
-  }
+    return value;
+  };
+
+  const deleteToken = async (token) => {
+    const redisKey = `${prefix}:${token}`;
+
+    await deleteCode(redisKey);
+  };
+
+  return { generate, verify, delete: deleteToken };
 };
 
-exports.deletePasswordResetToken = async (token) => {
-  try {
-    await deleteCode(`resetPassword:${token}`);
-  } catch (err) {
-    throw err;
-  }
-};
+//--- One-Time Token Service Instances ---
+exports.passwordResetTokenHandler = createOneTimeTokenHandler({
+  prefix: "resetPassword",
+  ttlInMinutes: 15,
+  errorMessage: "Password reset link is invalid or has expired.",
+});

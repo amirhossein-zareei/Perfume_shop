@@ -15,9 +15,7 @@ const {
   blocklistAccessToken,
   revokeRefreshToken,
   verifyRefreshToken,
-  generatePasswordResetToken,
-  verifyPasswordResetToken,
-  deletePasswordResetToken,
+  passwordResetTokenHandler
 } = require("../../../services/tokenService");
 const { sendPasswordRestEmail } = require("../../../services/emailService");
 
@@ -232,7 +230,7 @@ exports.forgotPassword = async (req, res, next) => {
     const user = await User.findOne({ email }).lean();
 
     if (user && !user.isBanned) {
-      const resetToken = await generatePasswordResetToken(user._id);
+      const resetToken = await passwordResetTokenHandler.generate(user._id);
       const resetUrl = `${app.frontendUrl}/reset-password/${resetToken}`;
 
       await sendPasswordRestEmail({
@@ -255,7 +253,7 @@ exports.resetPassword = async (req, res, next) => {
     const { token } = req.params;
     const { newPassword } = req.body;
 
-    const userId = await verifyPasswordResetToken(token);
+    const userId = await passwordResetTokenHandler.verify(token);
 
     const user = await User.findById(userId);
 
@@ -270,7 +268,7 @@ exports.resetPassword = async (req, res, next) => {
     user.password = newPassword;
     await user.save();
 
-    await deletePasswordResetToken(token);
+    await passwordResetTokenHandler.delete(token);
 
     return sendSuccess(res, "Your password has been reset successfully");
   } catch (err) {
