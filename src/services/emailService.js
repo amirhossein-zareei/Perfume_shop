@@ -29,20 +29,20 @@ const sendEmail = async ({ to, subject, text, html }) => {
   await transports.sendMail(mailOptions);
 };
 
-exports.sendPasswordRestEmail = async ({ name, email, url }) => {
+const _sendTemplateEmail = async ({ to, subject, template, replacements }) => {
   try {
-    const templatePath = path.join(
-      __dirname,
-      "../templates/passwordReset.html"
-    );
+    const templatePath = path.join(__dirname, "../templates", template);
     let htmlContent = fs.readFileSync(templatePath, "utf-8");
 
-    htmlContent = htmlContent.replace("{{name}}", name);
-    htmlContent = htmlContent.replace("{{resetLink}}", url);
+    for (const key in replacements) {
+      const regex = new RegExp(`{{${key}}}`, "g");
+
+      htmlContent = htmlContent.replace(regex, replacements[key]);
+    }
 
     await sendEmail({
-      to: email,
-      subject: "Reset Your Password for Perfume Shop",
+      to,
+      subject,
       html: htmlContent,
     });
 
@@ -50,4 +50,16 @@ exports.sendPasswordRestEmail = async ({ name, email, url }) => {
   } catch (err) {
     throw err;
   }
+};
+
+exports.sendPasswordRestEmail = async ({ name, email, url }) => {
+  return _sendTemplateEmail({
+    to: email,
+    subject: "Reset Your Password for Perfume Shop",
+    template: "passwordReset.html",
+    replacements: {
+      name: name,
+      resetLink: url,
+    },
+  });
 };
