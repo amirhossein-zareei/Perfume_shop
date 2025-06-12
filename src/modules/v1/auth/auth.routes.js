@@ -15,7 +15,6 @@ const {
   register,
   login,
   logout,
-  getMe,
   refreshToken,
   changePassword,
   forgotPassword,
@@ -31,7 +30,6 @@ router.get("/captcha", getCaptcha);
 router.post("/register", validate(registerValidation), register);
 router.post("/login", validate(loginValidation), login);
 router.post("/logout", auth, logout);
-router.get("/me", auth, getMe);
 
 router.post("/refresh-token", refreshToken);
 

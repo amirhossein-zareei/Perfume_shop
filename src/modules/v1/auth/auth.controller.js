@@ -83,7 +83,14 @@ exports.register = async (req, res, next) => {
     const user = await User.exists({ email });
 
     if (user) {
-      throw new AppError("Email is already registered", 409);
+      if (!user.isActive) {
+        throw new AppError(
+          "An account with this email already exists but is deactivated. Please contact support.",
+          409
+        );
+      } else {
+        throw new AppError("Email is already registered", 409);
+      }
     }
 
     const isFirstUser = (await User.countDocuments()) === 0;
@@ -127,6 +134,13 @@ exports.login = async (req, res, next) => {
       throw new AppError("Your account has been suspended.", 403);
     }
 
+    if (!user.isActive) {
+      throw new AppError(
+        "Your account has been deactivated. Please contact support for assistance.",
+        403
+      );
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -165,12 +179,6 @@ exports.logout = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
-
-exports.getMe = (req, res, next) => {
-  const user = req.user;
-
-  return sendSuccess(res, "User profile retrieved successfully.", user);
 };
 
 exports.refreshToken = async (req, res, next) => {
