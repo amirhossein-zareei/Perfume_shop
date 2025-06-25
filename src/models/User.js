@@ -44,6 +44,11 @@ const userSchema = new Schema(
       type: Boolean,
       default: true,
     },
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true, strict: true }
 );
@@ -57,16 +62,6 @@ userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
 
     this.password = await bcrypt.hash(this.password, 12);
-  } catch (err) {
-    next(err);
-  }
-});
-
-userSchema.pre("findOneAndUpdate", async function (next) {
-  try {
-    if (!this._update.password) return next();
-
-    this._update.password = await bcrypt.hash(this._update.password, 12);
   } catch (err) {
     next(err);
   }

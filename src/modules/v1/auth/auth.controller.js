@@ -1,5 +1,3 @@
-const bcrypt = require("bcrypt");
-
 const { User } = require("../../../models/index");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
@@ -141,7 +139,7 @@ exports.login = async (req, res, next) => {
       );
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.comparePassword(password);
 
     if (!isPasswordValid) {
       throw new AppError("Invalid email or password", 401);
@@ -220,7 +218,7 @@ exports.changePassword = async (req, res, next) => {
 
     const user = await User.findById(userId).select("+password");
 
-    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    const isPasswordMatch = await user.comparePassword(oldPassword);
 
     if (!isPasswordMatch) {
       throw new AppError("The old password you entered incorrect.", 400);
