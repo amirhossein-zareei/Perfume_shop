@@ -1,19 +1,13 @@
 const User = require("../models/User");
 const AppError = require("../utils/AppError");
-const { verifyAccessToken } = require("../services/tokenService");
+const {
+  verifyAccessToken,
+  getAccessToken,
+} = require("../services/tokenService");
 
 exports.auth = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new AppError(
-        "A valid Bearer token is required for authorization.",
-        401
-      );
-    }
-
-    const accessTokenValue = authHeader.split(" ")[1];
+    const accessTokenValue = getAccessToken(req.headers);
 
     const payload = await verifyAccessToken(accessTokenValue);
 

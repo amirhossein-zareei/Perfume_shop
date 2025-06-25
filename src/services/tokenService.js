@@ -113,6 +113,21 @@ exports.verifyRefreshToken = async (token) => {
   }
 };
 
+exports.getAccessToken = (headers) => {
+  const authHeader = headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new AppError(
+      "A valid Bearer token is required for authorization.",
+      401
+    );
+  }
+
+  const accessTokenValue = authHeader.split(" ")[1];
+
+  return accessTokenValue;
+};
+
 //---Token Revocation---
 exports.revokeRefreshToken = async (token) => {
   try {

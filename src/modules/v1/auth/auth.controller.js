@@ -15,6 +15,7 @@ const {
   verifyRefreshToken,
   passwordResetTokenHandler,
   emailVerificationTokenHandler,
+  getAccessToken,
 } = require("../../../services/tokenService");
 const {
   sendPasswordRestEmail,
@@ -140,7 +141,7 @@ exports.login = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
-    const { accessToken } = req;
+    const accessToken = getAccessToken(req.headers);
 
     const refreshTokenFromCookie = getAndValidateRefreshTokenCookie(req);
 
