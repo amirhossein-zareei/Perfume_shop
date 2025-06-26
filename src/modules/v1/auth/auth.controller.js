@@ -29,8 +29,8 @@ const {
 } = require("../../../utils/cookieHelper");
 
 //---- Helper Function ----
-const _handleCaptchaValidation = async (uuid, captcha) => {
-  const isCaptchaValid = await verifyCaptcha(uuid, captcha);
+const _handleCaptchaValidation = async (captchaId, captcha) => {
+  const isCaptchaValid = await verifyCaptcha(captchaId, captcha);
 
   if (!isCaptchaValid) {
     throw new AppError("Invalid CAPTCHA, Please try again", 400);
@@ -40,10 +40,10 @@ const _handleCaptchaValidation = async (uuid, captcha) => {
 //---- Exported Controller Actions ----
 exports.getCaptcha = async (req, res, next) => {
   try {
-    const { captcha, uuid } = await generateCaptcha();
+    const { captcha, captchaId } = await generateCaptcha();
 
     return sendSuccess(res, "Captcha generated successfully", {
-      uuid,
+      captchaId,
       captcha,
     });
   } catch (err) {
@@ -53,9 +53,9 @@ exports.getCaptcha = async (req, res, next) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, captcha, uuid } = req.body;
+    const { name, email, password, captcha, captchaId } = req.body;
 
-    await _handleCaptchaValidation(uuid, captcha);
+    await _handleCaptchaValidation(captchaId, captcha);
 
     const user = await User.exists({ email });
 
@@ -97,9 +97,9 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { email, password, captcha, uuid } = req.body;
+    const { email, password, captcha, captchaId } = req.body;
 
-    await _handleCaptchaValidation(uuid, captcha);
+    await _handleCaptchaValidation(captchaId, captcha);
 
     const user = await User.findOne({ email }).select("+password");
 
@@ -239,10 +239,10 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { token } = req.params;
+    const { resetToken } = req.params;
     const { newPassword } = req.body;
 
-    const userId = await passwordResetTokenHandler.verify(token);
+    const userId = await passwordResetTokenHandler.verify(resetToken);
 
     const user = await User.findById(userId);
 
@@ -257,7 +257,7 @@ exports.resetPassword = async (req, res, next) => {
     user.password = newPassword;
     await user.save();
 
-    await passwordResetTokenHandler.delete(token);
+    await passwordResetTokenHandler.delete(resetToken);
 
     return sendSuccess(res, "Your password has been reset successfully");
   } catch (err) {

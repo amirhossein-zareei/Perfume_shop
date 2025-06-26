@@ -12,12 +12,12 @@ exports.generateCaptcha = async () => {
       ignoreChars: "0oO1iIl",
     });
 
-    const uuid = uuidv4();
+    const captchaId = uuidv4();
 
-    await setCode(`captcha:${uuid}`, captcha.text.toLowerCase());
+    await setCode(`captcha:${captchaId}`, captcha.text.toLowerCase());
 
     return {
-      uuid,
+      captchaId,
       captcha: captcha.data,
     };
   } catch (err) {
@@ -25,15 +25,15 @@ exports.generateCaptcha = async () => {
   }
 };
 
-exports.verifyCaptcha = async (uuid, inputCaptcha) => {
+exports.verifyCaptcha = async (captchaId, inputCaptcha) => {
   try {
-    const storedCaptcha = await getCode(`captcha:${uuid}`);
+    const storedCaptcha = await getCode(`captcha:${captchaId}`);
 
     if (!storedCaptcha) {
       return false;
     }
 
-    await deleteCode(`captcha:${uuid}`);
+    await deleteCode(`captcha:${captchaId}`);
 
     if (storedCaptcha !== inputCaptcha.toLowerCase()) {
       return false;
