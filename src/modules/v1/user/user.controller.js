@@ -1,7 +1,5 @@
 const { User, Address } = require("../../../models");
-const {
-  performLogout,
-} = require("../../../services/tokenService");
+const { performLogout } = require("../../../services/tokenService");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
@@ -28,3 +26,20 @@ exports.deleteMe = async (req, res, next) => {
   }
 };
 
+exports.updateMe = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { name } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { name },
+      { new: true }
+    );
+    return sendSuccess(res, "Your information has been updated successfully", {
+      name: updatedUser.name,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
