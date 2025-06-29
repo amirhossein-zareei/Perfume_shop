@@ -4,6 +4,10 @@ const { v4: uuidv4 } = require("uuid");
 const { setCode, getCode, deleteCode } = require("../utils/redisCode");
 const { auth } = require("../config/env");
 const AppError = require("../utils/AppError");
+const {
+  clearRefreshTokenCookie,
+  getAndValidateRefreshTokenCookie,
+} = require("../utils/cookieHelper");
 
 const _getJtiFromToken = (token) => {
   const decodedToken = jwt.decode(token);
@@ -27,7 +31,7 @@ const _verifyTokenAndGetPayload = (token, secretKey) => {
 };
 
 //---Token Generation---
-exports.generateAccessToken = (user) => {
+const generateAccessToken = (user) => {
   try {
     const accessToken = jwt.sign(
       {
@@ -45,7 +49,7 @@ exports.generateAccessToken = (user) => {
   }
 };
 
-exports.generateRefreshToken = async (userId) => {
+const generateRefreshToken = async (userId) => {
   try {
     const jti = uuidv4();
     const currentUserId = userId.toString();
@@ -70,7 +74,7 @@ exports.generateRefreshToken = async (userId) => {
 };
 
 //---Token Validation---
-exports.verifyAccessToken = async (token) => {
+const verifyAccessToken = async (token) => {
   try {
     const payload = _verifyTokenAndGetPayload(token, auth.accessTokenSecretKey);
 
@@ -79,14 +83,14 @@ exports.verifyAccessToken = async (token) => {
     if (blocklistEntry) {
       throw new AppError("Access denied. Token is invalid or revoked.", 401);
     }
-    
+
     return payload;
   } catch (err) {
     throw err;
   }
 };
 
-exports.verifyRefreshToken = async (token) => {
+const verifyRefreshToken = async (token) => {
   try {
     const payload = _verifyTokenAndGetPayload(
       token,
@@ -113,7 +117,7 @@ exports.verifyRefreshToken = async (token) => {
   }
 };
 
-exports.getAccessToken = (headers) => {
+const getAccessToken = (headers) => {
   const authHeader = headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -129,7 +133,7 @@ exports.getAccessToken = (headers) => {
 };
 
 //---Token Revocation---
-exports.revokeRefreshToken = async (token) => {
+const revokeRefreshToken = async (token) => {
   try {
     const payload = _verifyTokenAndGetPayload(
       token,
@@ -153,7 +157,7 @@ exports.revokeRefreshToken = async (token) => {
   }
 };
 
-exports.blocklistAccessToken = async (token) => {
+const blocklistAccessToken = async (token) => {
   try {
     const jti = _getJtiFromToken(token);
 
@@ -179,6 +183,19 @@ exports.blocklistAccessToken = async (token) => {
   } catch (err) {
     throw err;
   }
+};
+
+const performLogout = async (req, res) => {
+  const accessToken = getAccessToken(req.headers);
+
+  const refreshTokenFromCookie = getAndValidateRefreshTokenCookie(req);
+
+  clearRefreshTokenCookie(res);
+
+  await Promise.all([
+    blocklistAccessToken(accessToken),
+    revokeRefreshToken(refreshTokenFromCookie),
+  ]);
 };
 
 //--- One-Time Token Handler Factory ---
@@ -216,14 +233,28 @@ const createOneTimeTokenHandler = (option) => {
 };
 
 //--- One-Time Token Service Instances ---
-exports.passwordResetTokenHandler = createOneTimeTokenHandler({
+const passwordResetTokenHandler = createOneTimeTokenHandler({
   prefix: "resetPassword",
   ttlInMinutes: 15,
   errorMessage: "Password reset link is invalid or has expired.",
 });
 
-exports.emailVerificationTokenHandler = createOneTimeTokenHandler({
+const emailVerificationTokenHandler = createOneTimeTokenHandler({
   prefix: "emailVerification",
   ttlInMinutes: 15,
   errorMessage: "Email Verification link is invalid or has expired.",
 });
+
+module.exports = {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+  getAccessToken,
+  revokeRefreshToken,
+  blocklistAccessToken,
+  performLogout,
+  createOneTimeTokenHandler,
+  passwordResetTokenHandler,
+  emailVerificationTokenHandler,
+};

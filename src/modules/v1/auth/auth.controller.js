@@ -10,12 +10,11 @@ const {
 const {
   generateAccessToken,
   generateRefreshToken,
-  blocklistAccessToken,
   revokeRefreshToken,
   verifyRefreshToken,
   passwordResetTokenHandler,
   emailVerificationTokenHandler,
-  getAccessToken,
+  performLogout,
 } = require("../../../services/tokenService");
 const {
   sendPasswordRestEmail,
@@ -24,7 +23,6 @@ const {
 
 const {
   setRefreshTokenCookie,
-  clearRefreshTokenCookie,
   getAndValidateRefreshTokenCookie,
 } = require("../../../utils/cookieHelper");
 
@@ -141,16 +139,7 @@ exports.login = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
   try {
-    const accessToken = getAccessToken(req.headers);
-
-    const refreshTokenFromCookie = getAndValidateRefreshTokenCookie(req);
-
-    clearRefreshTokenCookie(res);
-
-    await Promise.all([
-      blocklistAccessToken(accessToken),
-      revokeRefreshToken(refreshTokenFromCookie),
-    ]);
+    await performLogout(req, res);
 
     return sendSuccess(res, "Successfully logged out.");
   } catch (err) {
