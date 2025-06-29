@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const errorHandler = require("./middlewares/errorHandlerMiddleware");
 const AppError = require("./utils/AppError");
 const authRouter = require("./modules/v1/auth/auth.routes");
+const userRouter = require("./modules/v1/user/user.routes");
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 //* Routers
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", userRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {
