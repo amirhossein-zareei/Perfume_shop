@@ -27,6 +27,65 @@ const updateMeValidation = {
   }),
 };
 
+const createAddressValidation = {
+  body: createBodyObjectSchema({
+    phone: joi
+      .string()
+      .trim()
+      .pattern(/^\+?[1-9]\d{6,14}$/)
+      .required()
+      .messages({
+        "string.pattern.base": "Please enter a valid phone number format.",
+        "string.empty": "Phone number cannot be empty.",
+        "any.required": "Phone number is required.",
+      }),
+
+    stateId: joi.number().integer().min(100).max(9999).required().messages({
+      "number.base": "Province ID must be a number.",
+      "number.integer": "Province ID must be an integer.",
+      "number.min": "Province ID is not valid.",
+      "number.max": "Province ID is not valid.",
+      "any.required": "Selecting a province is required.",
+    }),
+
+    cityId: joi.string().hex().length(24).required().messages({
+      "string.hex": "City ID format is not valid.",
+      "string.length": "City ID format is not valid.",
+      "any.required": "Selecting a city is required.",
+    }),
+
+    addressLine: joi.string().trim().min(5).max(255).required().messages({
+      "string.min": "Address line must be at least 5 characters.",
+      "string.max": "Address line must not exceed 255 characters.",
+      "string.empty": "Address line cannot be empty.",
+      "any.required": "Address line is required.",
+    }),
+
+    postalCode: joi
+      .string()
+      .trim()
+      .uppercase()
+      .pattern(/^[a-zA-Z0-9\s-]{3,10}$/)
+      .required()
+      .messages({
+        "string.pattern.base": "Please enter a valid postal code.",
+        "string.empty": "Postal code cannot be empty.",
+        "any.required": "Postal code is required.",
+      }),
+
+    latitude: joi.number().min(-90).max(90).optional().messages({
+      "number.min": "Latitude must be at least -90",
+      "number.max": "Latitude must be at most 90",
+    }),
+
+    longitude: joi.number().min(-180).max(180).optional().messages({
+      "number.min": "Longitude must be at least -180",
+      "number.max": "Longitude must be at most 180",
+    }),
+  }),
+};
+
 module.exports = {
   updateMeValidation,
+  createAddressValidation,
 };
