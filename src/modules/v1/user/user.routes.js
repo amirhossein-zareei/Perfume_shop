@@ -2,13 +2,20 @@ const { Router } = require("express");
 
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
-const { updateMeValidation, createAddressValidation } = require("./user.validation");
+const {
+  updateMeValidation,
+  createAddressValidation,
+  updateAddressValidation,
+  deleteAddressValidation,
+} = require("./user.validation");
 const {
   getMe,
   deleteMe,
   updateMe,
   getAddresses,
-  createAddress
+  createAddress,
+  updateAddress,
+  deleteAddress,
 } = require("./user.controller");
 
 const router = Router();
@@ -24,4 +31,8 @@ router
   .get(auth, getAddresses)
   .post(auth, validate(createAddressValidation), createAddress);
 
+router
+  .route("/me/addresses/:addressId")
+  .patch(auth, validate(updateAddressValidation), updateAddress)
+  .delete(auth, validate(deleteAddressValidation), deleteAddress);
 module.exports = router;

@@ -7,6 +7,12 @@ const createBodyObjectSchema = (fields) => {
   });
 };
 
+const createParamsObjectSchema = (fields) => {
+  return joi.object(fields).unknown(false).messages({
+    "object.base": "Request params must be an object",
+  });
+};
+
 const updateMeValidation = {
   body: createBodyObjectSchema({
     name: joi
@@ -85,7 +91,75 @@ const createAddressValidation = {
   }),
 };
 
+const updateAddressValidation = {
+  params: createParamsObjectSchema({
+    addressId: joi.string().hex().length(24).required().messages({
+      "any.required": "Address ID is required in the URL.",
+      "string.hex": "The format of the Address ID is invalid.",
+      "string.length": "The format of the Address ID is invalid.",
+    }),
+  }),
+
+  body: createBodyObjectSchema({
+    phone: joi
+      .string()
+      .trim()
+      .pattern(/^\+?[1-9]\d{6,14}$/)
+      .messages({
+        "string.pattern.base": "Please enter a valid phone number format.",
+      }),
+
+    stateId: joi.number().integer().min(100).max(9999).messages({
+      "number.base": "Province ID must be a number.",
+      "number.integer": "Province ID must be an integer.",
+      "number.min": "Province ID is not valid.",
+      "number.max": "Province ID is not valid.",
+    }),
+
+    cityId: joi.string().hex().length(24).messages({
+      "string.hex": "City ID format is not valid.",
+      "string.length": "City ID format is not valid.",
+    }),
+
+    addressLine: joi.string().trim().min(5).max(255).messages({
+      "string.min": "Address line must be at least 5 characters.",
+      "string.max": "Address line must not exceed 255 characters.",
+    }),
+
+    postalCode: joi
+      .string()
+      .trim()
+      .uppercase()
+      .pattern(/^[a-zA-Z0-9\s-]{3,10}$/)
+      .messages({
+        "string.pattern.base": "Please enter a valid postal code.",
+      }),
+
+    latitude: joi.number().min(-90).max(90).optional().messages({
+      "number.min": "Latitude must be at least -90",
+      "number.max": "Latitude must be at most 90",
+    }),
+
+    longitude: joi.number().min(-180).max(180).optional().messages({
+      "number.min": "Longitude must be at least -180",
+      "number.max": "Longitude must be at most 180",
+    }),
+  }),
+};
+
+const deleteAddressValidation = {
+  params: createParamsObjectSchema({
+    addressId: joi.string().hex().length(24).required().messages({
+      "any.required": "Address ID is required in the URL.",
+      "string.hex": "The format of the Address ID is invalid.",
+      "string.length": "The format of the Address ID is invalid.",
+    }),
+  }),
+};
+
 module.exports = {
   updateMeValidation,
   createAddressValidation,
+  updateAddressValidation,
+  deleteAddressValidation,
 };

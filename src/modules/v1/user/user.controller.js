@@ -100,3 +100,55 @@ exports.createAddress = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.updateAddress = async (req, res, next) => {
+  try {
+    const { addressId } = req.params;
+    const { stateId, cityId } = req.body;
+
+    const address = await Address.findById(addressId);
+
+    if (!address) {
+      throw new AppError("Address not found", 404);
+    }
+
+    if (stateId) {
+      const isStateValid = await State.exists({ _id: stateId });
+
+      if (!isStateValid) {
+        throw new AppError("State not found.", 400);
+      }
+    }
+
+    if (cityId) {
+      const isCityValid = await City.exists({ _id: cityId });
+
+      if (!isCityValid) {
+        throw new AppError("City not found.", 400);
+      }
+    }
+
+    Object.assign(address, req.body);
+    const updatedAddress = await address.save();
+
+    return sendSuccess(res, "Address updated successfully.", updatedAddress);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteAddress = async (req, res, next) => {
+  try {
+    const { addressId } = req.params;
+
+    const address = await Address.findByIdAndDelete(addressId);
+
+    if (!address) {
+      throw new AppError("Address not found", 404);
+    }
+
+    return sendSuccess(res, "Address deleted successfully.");
+  } catch (err) {
+    next(err);
+  }
+};
