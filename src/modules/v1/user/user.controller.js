@@ -1,4 +1,4 @@
-const { User, Address, City, State } = require("../../../models");
+const { User, Address, City, State, Order } = require("../../../models");
 const { performLogout } = require("../../../services/tokenService");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
@@ -148,6 +148,18 @@ exports.deleteAddress = async (req, res, next) => {
     }
 
     return sendSuccess(res, "Address deleted successfully.");
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getOrders = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const orders = await Order.find({ userId }).lean();
+
+    return sendSuccess(res, "", orders);
   } catch (err) {
     next(err);
   }

@@ -16,6 +16,7 @@ const {
   createAddress,
   updateAddress,
   deleteAddress,
+  getOrders,
 } = require("./user.controller");
 
 const router = Router();
@@ -35,4 +36,7 @@ router
   .route("/me/addresses/:addressId")
   .patch(auth, validate(updateAddressValidation), updateAddress)
   .delete(auth, validate(deleteAddressValidation), deleteAddress);
+
+router.get("/me/orders", auth, getOrders);
+
 module.exports = router;
