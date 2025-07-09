@@ -30,4 +30,10 @@ module.exports = {
     password: process.env.REDIS_PASSWORD,
     tls: process.env.REDIS_TLS === "true",
   },
+
+  cloudinaryConfigs: {
+    name: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
 };
