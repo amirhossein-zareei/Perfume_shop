@@ -12,12 +12,14 @@ const {
   getMe,
   deleteMe,
   updateMe,
+  uploadProfileImage,
   getAddresses,
   createAddress,
   updateAddress,
   deleteAddress,
   getOrders,
 } = require("./user.controller");
+const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 
 const router = Router();
 
@@ -26,6 +28,13 @@ router
   .get(auth, getMe)
   .delete(auth, deleteMe)
   .patch(auth, validate(updateMeValidation), updateMe);
+
+router.post(
+  "/me/avatar",
+  auth,
+  uploadPrivateFile.single("profileImage"),
+  uploadProfileImage
+);
 
 router
   .route("/me/addresses")

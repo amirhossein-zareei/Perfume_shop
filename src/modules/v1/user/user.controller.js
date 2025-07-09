@@ -2,9 +2,18 @@ const { User, Address, City, State, Order } = require("../../../models");
 const { performLogout } = require("../../../services/tokenService");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
+const {
+  deleteFiles,
+  generateSignedUrl,
+} = require("../../../services/cloudinaryService");
 
 exports.getMe = (req, res, next) => {
   const user = req.user;
+
+  const avatarUrl = generateSignedUrl(user.avatarPublicId);
+
+  user.avatarUrl = avatarUrl;
+  delete user.avatarPublicId;
 
   return sendSuccess(res, "User profile retrieved successfully.", user);
 };
@@ -39,6 +48,40 @@ exports.updateMe = async (req, res, next) => {
     return sendSuccess(res, "Your information has been updated successfully", {
       name: updatedUser.name,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.uploadProfileImage = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const image = req.file;
+
+    if (!image) {
+      throw new AppError("No image provided", 400);
+    }
+
+    const user = await User.findById(userId);
+
+    const oldPublicId = user.avatarPublicId;
+
+    if (oldPublicId !== "profiles_images/cu2y7fkd8irfo16pixpx") {
+      await deleteFiles(oldPublicId, "authenticated");
+    }
+
+    const newPublicId = image.filename;
+    user.avatarPublicId = newPublicId;
+
+    await user.save();
+
+    const imageUrl = generateSignedUrl(newPublicId);
+
+    const userObject = user.toObject();
+    delete userObject.avatarPublicId;
+    userObject.avatarUrl = imageUrl;
+
+    return sendSuccess(res, "", userObject);
   } catch (err) {
     next(err);
   }
