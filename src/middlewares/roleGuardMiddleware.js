@@ -3,8 +3,8 @@ const AppError = require("../utils/AppError");
 module.exports = (role) => {
   return (req, res, next) => {
     try {
-      if (!req.user.role === role) {
-        return AppError("You have not access to this route", 401);
+      if (req.user.role !== role) {
+        throw new AppError("You have not access to this route", 401);
       }
 
       next();

@@ -9,6 +9,9 @@ const {
   updateAddressValidation,
   deleteAddressValidation,
   getUserValidation,
+  changeRoleValidation,
+  banUserValidation,
+  unbanUserValidation,
 } = require("./user.validation");
 const {
   getMe,
@@ -22,6 +25,9 @@ const {
   getOrders,
   getUsers,
   getUser,
+  changeRole,
+  banUser,
+  unbanUser,
 } = require("./user.controller");
 const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 
@@ -62,5 +68,31 @@ router
     roleGuardMiddleware("ADMIN"),
     getUser
   );
+
+router.patch(
+  "/:userId/role",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(changeRoleValidation),
+  changeRole
+);
+
+router.patch(
+  "/:userId/ban",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(banUserValidation),
+  banUser
+);
+
+router.patch(
+  "/:userId/unban",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(unbanUserValidation),
+  unbanUser
+);
+
+// /:userId/reactivate
 
 module.exports = router;

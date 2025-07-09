@@ -245,3 +245,74 @@ exports.getUser = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.changeRole = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true }
+    )
+      .select("name email role")
+      .lean();
+
+    if (!updatedUser) {
+      throw new AppError("User not found.", 404);
+    }
+
+    return sendSuccess(
+      res,
+      "User role has been updated successfully.",
+      updatedUser
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.banUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const bannedUser = await User.findByIdAndUpdate(
+      userId,
+      { isBanned: true },
+      { new: true }
+    )
+      .select("name email role isBanned")
+      .lean();
+
+    if (!bannedUser) {
+      throw new AppError("User not found.", 404);
+    }
+
+    return sendSuccess(res, "User has been banned successfully.", bannedUser);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.unbanUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const unbannedUser = await User.findByIdAndUpdate(
+      userId,
+      { isBanned: false },
+      { new: true }
+    )
+      .select("name email role isBanned")
+      .lean();
+
+    if (!unbannedUser) {
+      throw new AppError("User not found.", 404);
+    }
+
+    return sendSuccess(res, "User has been unbanned successfully.", unbannedUser);
+  } catch (err) {
+    next(err);
+  }
+};

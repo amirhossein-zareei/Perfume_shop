@@ -3,6 +3,7 @@ const AppError = require("../utils/AppError");
 const {
   verifyAccessToken,
   getAccessToken,
+  performLogout,
 } = require("../services/tokenService");
 
 exports.auth = async (req, res, next) => {
@@ -30,6 +31,7 @@ exports.auth = async (req, res, next) => {
     }
 
     if (user.isBanned) {
+      await performLogout(req, res);
       throw new AppError("Access to this account has been suspended.", 403);
     }
 

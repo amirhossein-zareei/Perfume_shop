@@ -167,10 +167,52 @@ const getUserValidation = {
   }),
 };
 
+const changeRoleValidation = {
+  params: createParamsObjectSchema({
+    userId: joi.string().hex().length(24).required().messages({
+      "any.required": "User ID is required in the URL.",
+      "string.hex": "The format of the User ID is invalid.",
+      "string.length": "The format of the User ID is invalid.",
+    }),
+  }),
+
+  body: createBodyObjectSchema({
+    role: joi.string().trim().valid("ADMIN", "USER").required().messages({
+      "string.base": "Role must be a string.",
+      "string.empty": "Role is required.",
+      "any.only": "Role must be either 'ADMIN' or 'USER'.",
+      "any.required": "Role is required.",
+    }),
+  }),
+};
+
+const banUserValidation = {
+  params: createParamsObjectSchema({
+    userId: joi.string().hex().length(24).required().messages({
+      "any.required": "User ID is required in the URL.",
+      "string.hex": "The format of the User ID is invalid.",
+      "string.length": "The format of the User ID is invalid.",
+    }),
+  }),
+};
+
+const unbanUserValidation = {
+  params: createParamsObjectSchema({
+    userId: joi.string().hex().length(24).required().messages({
+      "any.required": "User ID is required in the URL.",
+      "string.hex": "The format of the User ID is invalid.",
+      "string.length": "The format of the User ID is invalid.",
+    }),
+  }),
+};
+
 module.exports = {
   updateMeValidation,
   createAddressValidation,
   updateAddressValidation,
   deleteAddressValidation,
   getUserValidation,
+  changeRoleValidation,
+  banUserValidation,
+  unbanUserValidation,
 };
