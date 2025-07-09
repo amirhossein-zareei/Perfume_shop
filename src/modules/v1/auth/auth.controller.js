@@ -25,6 +25,7 @@ const {
   setRefreshTokenCookie,
   getAndValidateRefreshTokenCookie,
 } = require("../../../utils/cookieHelper");
+const { generateSignedUrl } = require("../../../services/cloudinaryService");
 
 //---- Helper Function ----
 const _handleCaptchaValidation = async (captchaId, captcha) => {
@@ -75,6 +76,7 @@ exports.register = async (req, res, next) => {
       email,
       password,
       role: isFirstUser ? "ADMIN" : "USER",
+      avatarPublicId: "profiles_images/cu2y7fkd8irfo16pixpx",
     });
 
     await newUser.save();
@@ -127,9 +129,12 @@ exports.login = async (req, res, next) => {
 
     setRefreshTokenCookie(res, refreshToken);
 
+    const avatarUrl = generateSignedUrl(user.avatarPublicId);
+
     return sendSuccess(res, "Login successful", {
       id: user._id,
       name: user.name,
+      avatarUrl,
       accessToken,
     });
   } catch (err) {
