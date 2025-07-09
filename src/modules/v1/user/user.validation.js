@@ -206,6 +206,16 @@ const unbanUserValidation = {
   }),
 };
 
+const reactivateUserValidation = {
+  params: createParamsObjectSchema({
+    userId: joi.string().hex().length(24).required().messages({
+      "any.required": "User ID is required in the URL.",
+      "string.hex": "The format of the User ID is invalid.",
+      "string.length": "The format of the User ID is invalid.",
+    }),
+  }),
+};
+
 module.exports = {
   updateMeValidation,
   createAddressValidation,
@@ -215,4 +225,5 @@ module.exports = {
   changeRoleValidation,
   banUserValidation,
   unbanUserValidation,
+  reactivateUserValidation,
 };

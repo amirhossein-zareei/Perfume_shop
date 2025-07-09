@@ -12,6 +12,7 @@ const {
   changeRoleValidation,
   banUserValidation,
   unbanUserValidation,
+  reactivateUserValidation,
 } = require("./user.validation");
 const {
   getMe,
@@ -28,6 +29,7 @@ const {
   changeRole,
   banUser,
   unbanUser,
+  reactivateUser,
 } = require("./user.controller");
 const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 
@@ -93,6 +95,12 @@ router.patch(
   unbanUser
 );
 
-// /:userId/reactivate
+router.patch(
+  "/:userId/reactivate",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(reactivateUserValidation),
+  reactivateUser
+);
 
 module.exports = router;

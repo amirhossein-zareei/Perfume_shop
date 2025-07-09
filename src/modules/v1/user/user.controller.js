@@ -311,7 +311,37 @@ exports.unbanUser = async (req, res, next) => {
       throw new AppError("User not found.", 404);
     }
 
-    return sendSuccess(res, "User has been unbanned successfully.", unbannedUser);
+    return sendSuccess(
+      res,
+      "User has been unbanned successfully.",
+      unbannedUser
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.reactivateUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const reactivatedUser = await User.findByIdAndUpdate(
+      userId,
+      { isActive: true },
+      { new: true }
+    )
+      .select("name email role isActive")
+      .lean();
+
+    if (!reactivatedUser) {
+      throw new AppError("User not found.", 404);
+    }
+
+    return sendSuccess(
+      res,
+      "User has been reactivated successfully.",
+      reactivatedUser
+    );
   } catch (err) {
     next(err);
   }
