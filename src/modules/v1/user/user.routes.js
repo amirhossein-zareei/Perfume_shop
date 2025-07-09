@@ -2,11 +2,13 @@ const { Router } = require("express");
 
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
+const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
 const {
   updateMeValidation,
   createAddressValidation,
   updateAddressValidation,
   deleteAddressValidation,
+  getUserValidation,
 } = require("./user.validation");
 const {
   getMe,
@@ -18,6 +20,8 @@ const {
   updateAddress,
   deleteAddress,
   getOrders,
+  getUsers,
+  getUser,
 } = require("./user.controller");
 const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 
@@ -47,5 +51,16 @@ router
   .delete(auth, validate(deleteAddressValidation), deleteAddress);
 
 router.get("/me/orders", auth, getOrders);
+
+router.get("/", auth, roleGuardMiddleware("ADMIN"), getUsers);
+
+router
+  .route("/:userId")
+  .get(
+    auth,
+    validate(getUserValidation),
+    roleGuardMiddleware("ADMIN"),
+    getUser
+  );
 
 module.exports = router;

@@ -157,9 +157,20 @@ const deleteAddressValidation = {
   }),
 };
 
+const getUserValidation = {
+  params: createParamsObjectSchema({
+    userId: joi.string().hex().length(24).required().messages({
+      "any.required": "Address ID is required in the URL.",
+      "string.hex": "The format of the Address ID is invalid.",
+      "string.length": "The format of the Address ID is invalid.",
+    }),
+  }),
+};
+
 module.exports = {
   updateMeValidation,
   createAddressValidation,
   updateAddressValidation,
   deleteAddressValidation,
+  getUserValidation,
 };

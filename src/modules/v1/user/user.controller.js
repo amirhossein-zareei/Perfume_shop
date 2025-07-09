@@ -207,3 +207,41 @@ exports.getOrders = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().select("name email avatarPublicId").lean();
+
+    users.forEach((user) => {
+      const avatarUrl = generateSignedUrl(user.avatarPublicId);
+
+      user.avatarUrl = avatarUrl;
+      delete user.avatarPublicId;
+    });
+
+    return sendSuccess(res, "", users);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getUser = async (req, res, next) => {
+  try {
+    const targetUserId = req.params.userId;
+
+    const targetUser = await User.findById(targetUserId).lean();
+
+    if (!targetUser) {
+      throw new AppError("User not found.", 404);
+    }
+
+    const avatarUrl = generateSignedUrl(targetUser.avatarPublicId);
+
+    targetUser.avatarUrl = avatarUrl;
+    delete targetUser.avatarPublicId;
+
+    return sendSuccess(res, "", targetUser);
+  } catch (err) {
+    next(err);
+  }
+};
