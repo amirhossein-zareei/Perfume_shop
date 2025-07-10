@@ -13,6 +13,8 @@ const {
   banUserValidation,
   unbanUserValidation,
   reactivateUserValidation,
+  getOrdersValidation,
+  getUsersValidation,
 } = require("./user.validation");
 const {
   getMe,
@@ -58,9 +60,15 @@ router
   .patch(auth, validate(updateAddressValidation), updateAddress)
   .delete(auth, validate(deleteAddressValidation), deleteAddress);
 
-router.get("/me/orders", auth, getOrders);
+router.get("/me/orders", auth, validate(getOrdersValidation), getOrders);
 
-router.get("/", auth, roleGuardMiddleware("ADMIN"), getUsers);
+router.get(
+  "/",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(getUsersValidation),
+  getUsers
+);
 
 router
   .route("/:userId")

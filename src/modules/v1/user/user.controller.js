@@ -6,6 +6,7 @@ const {
   deleteFiles,
   generateSignedUrl,
 } = require("../../../services/cloudinaryService");
+const APIFeatures = require("../../../utils/apiFeatures");
 
 exports.getMe = (req, res, next) => {
   const user = req.user;
@@ -200,7 +201,10 @@ exports.getOrders = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const orders = await Order.find({ userId }).lean();
+    const query = Order.find({ userId });
+
+    const features = new APIFeatures(query, req.query).sort().paginate();
+    const orders = await features.query;
 
     return sendSuccess(res, "", orders);
   } catch (err) {
@@ -210,7 +214,12 @@ exports.getOrders = async (req, res, next) => {
 
 exports.getUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select("name email avatarPublicId").lean();
+    const query = User.find();
+
+    const features = new APIFeatures(query, req.query).sort().paginate();
+    const users = await features.query
+      .select("name email avatarPublicId")
+      .lean();
 
     users.forEach((user) => {
       const avatarUrl = generateSignedUrl(user.avatarPublicId);

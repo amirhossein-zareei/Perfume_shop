@@ -1,4 +1,7 @@
 const joi = require("joi");
+const {
+  createListOptionsValidation,
+} = require("../../../utils/validationHelpers");
 
 const createBodyObjectSchema = (fields) => {
   return joi.object(fields).required().unknown(false).messages({
@@ -157,6 +160,10 @@ const deleteAddressValidation = {
   }),
 };
 
+const getOrdersValidation = createListOptionsValidation();
+
+const getUsersValidation = createListOptionsValidation();
+
 const getUserValidation = {
   params: createParamsObjectSchema({
     userId: joi.string().hex().length(24).required().messages({
@@ -221,6 +228,8 @@ module.exports = {
   createAddressValidation,
   updateAddressValidation,
   deleteAddressValidation,
+  getOrdersValidation,
+  getUsersValidation,
   getUserValidation,
   changeRoleValidation,
   banUserValidation,
