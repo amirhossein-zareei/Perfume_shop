@@ -18,8 +18,14 @@ const brandSchema = new Schema(
     },
 
     logo: {
-      type: String,
-      required: true,
+      url: {
+        type: String,
+        required: true,
+      },
+      publicId: {
+        type: String,
+        required: true,
+      },
     },
 
     content: {
