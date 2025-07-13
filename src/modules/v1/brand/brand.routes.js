@@ -8,12 +8,14 @@ const {
   createBrandValidation,
   getBrandsValidation,
   slugValidation,
+  updateBrandValidation,
 } = require("./brand.validation");
 const {
   createBrand,
   getBrands,
   getBrand,
   deleteBrand,
+  updateBrand,
 } = require("./brand.controller");
 
 const router = Router();
@@ -32,6 +34,18 @@ router
 router
   .route("/:slug")
   .get(validate(slugValidation), getBrand)
-  .delete(validate(slugValidation), deleteBrand);
+  .delete(
+    auth,
+    roleGuardMiddleware("ADMIN"),
+    validate(slugValidation),
+    deleteBrand
+  )
+  .patch(
+    auth,
+    roleGuardMiddleware("ADMIN"),
+    uploadPublicFile.single("logo"),
+    validate(updateBrandValidation),
+    updateBrand
+  );
 
 module.exports = router;

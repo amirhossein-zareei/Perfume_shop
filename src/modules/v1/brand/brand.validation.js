@@ -52,8 +52,34 @@ const slugValidation = {
   }),
 };
 
+const updateBrandValidation = {
+  body: createBodyObjectSchema({
+    name: joi.string().trim().min(2).max(50).messages({
+      "string.base": "Brand name must be a string.",
+      "string.min": "Brand name must be at least 2 characters long.",
+      "string.max": "Brand name must not exceed 50 characters.",
+    }),
+
+    content: joi.string().trim().min(10).messages({
+      "string.base": "Content must be a string.",
+      "string.empty": "Content is required.",
+      "string.min": "Content must be at least 10 characters long.",
+    }),
+
+    website: joi.string().trim().uri().messages({
+      "string.base": "Website must be a string.",
+      "string.empty": "Website URL is required.",
+      "string.uri":
+        "Please enter a valid website URL (e.g., https://example.com).",
+    }),
+  }),
+
+  params: slugValidation.params,
+};
+
 module.exports = {
   createBrandValidation,
   getBrandsValidation,
   slugValidation,
+  updateBrandValidation,
 };

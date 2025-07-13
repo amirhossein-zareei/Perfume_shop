@@ -1,4 +1,5 @@
 const { Brand } = require("../../../models/index");
+const { deleteFiles } = require("../../../services/cloudinaryService");
 const APIFeatures = require("../../../utils/apiFeatures");
 const sendSuccessResponse = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
@@ -17,7 +18,6 @@ exports.createBrand = async (req, res, next) => {
     if (isBrandNameExist) {
       throw new AppError("A brand whit this name already exists.", 409);
     }
-    console.log(JSON.stringify(logoFile, null, 2));
 
     const newBrand = new Brand({
       name,
@@ -87,6 +87,41 @@ exports.deleteBrand = async (req, res, next) => {
     }
 
     return sendSuccessResponse(res, "Brand deleted successfully.", brand);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateBrand = async (req, res, next) => {
+  try {
+    const { name, content, website } = req.body;
+    const { slug } = req.params;
+    const logoFile = req.file;
+
+    const brand = await Brand.findOne({ slug });
+
+    if (!brand) {
+      throw new AppError("Brand not found.", 404);
+    }
+
+    if (logoFile) {
+      await deleteFiles(brand.logo.publicId);
+
+      brand.logo.url = logoFile.path;
+      brand.logo.publicId = logoFile.filename;
+    }
+
+    Object.keys(req.body).forEach((key) => {
+      brand[key] = req.body[key];
+    });
+
+    const updatedBrand = await brand.save();
+
+    return sendSuccessResponse(
+      res,
+      "Brand updated successfully.",
+      updatedBrand
+    );
   } catch (err) {
     next(err);
   }
