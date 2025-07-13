@@ -37,34 +37,36 @@ const {
 
 const router = Router();
 
+router.use(auth);
+
 router
   .route("/me")
-  .get(auth, getMe)
-  .delete(auth, deleteMe)
-  .patch(auth, validate(updateMeValidation), updateMe);
+  .get(getMe)
+  .delete(deleteMe)
+  .patch(validate(updateMeValidation), updateMe);
 
 router.post(
   "/me/avatar",
-  auth,
+
   uploadPrivateFile.single("profileImage"),
   uploadProfileImage
 );
 
 router
   .route("/me/addresses")
-  .get(auth, getAddresses)
-  .post(auth, validate(createAddressValidation), createAddress);
+  .get(getAddresses)
+  .post(validate(createAddressValidation), createAddress);
 
 router
   .route("/me/addresses/:addressId")
-  .patch(auth, validate(updateAddressValidation), updateAddress)
-  .delete(auth, validate(deleteAddressValidation), deleteAddress);
+  .patch(validate(updateAddressValidation), updateAddress)
+  .delete(validate(deleteAddressValidation), deleteAddress);
 
-router.get("/me/orders", auth, validate(getOrdersValidation), getOrders);
+router.get("/me/orders", validate(getOrdersValidation), getOrders);
 
 router.get(
   "/",
-  auth,
+
   roleGuardMiddleware("ADMIN"),
   validate(getUsersValidation),
   getUsers
@@ -72,16 +74,11 @@ router.get(
 
 router
   .route("/:userId")
-  .get(
-    auth,
-    validate(getUserValidation),
-    roleGuardMiddleware("ADMIN"),
-    getUser
-  );
+  .get(validate(getUserValidation), roleGuardMiddleware("ADMIN"), getUser);
 
 router.patch(
   "/:userId/role",
-  auth,
+
   roleGuardMiddleware("ADMIN"),
   validate(changeRoleValidation),
   changeRole
@@ -89,7 +86,7 @@ router.patch(
 
 router.patch(
   "/:userId/ban",
-  auth,
+
   roleGuardMiddleware("ADMIN"),
   validate(banUserValidation),
   banUser
@@ -97,7 +94,7 @@ router.patch(
 
 router.patch(
   "/:userId/unban",
-  auth,
+
   roleGuardMiddleware("ADMIN"),
   validate(unbanUserValidation),
   unbanUser
@@ -105,7 +102,7 @@ router.patch(
 
 router.patch(
   "/:userId/reactivate",
-  auth,
+
   roleGuardMiddleware("ADMIN"),
   validate(reactivateUserValidation),
   reactivateUser
