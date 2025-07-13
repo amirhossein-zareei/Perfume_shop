@@ -3,6 +3,7 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
+const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 const {
   updateMeValidation,
   createAddressValidation,
@@ -33,7 +34,6 @@ const {
   unbanUser,
   reactivateUser,
 } = require("./user.controller");
-const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 
 const router = Router();
 

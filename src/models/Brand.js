@@ -18,8 +18,14 @@ const brandSchema = new Schema(
     },
 
     logo: {
-      type: String,
-      required: true,
+      url: {
+        type: String,
+        required: true,
+      },
+      publicId: {
+        type: String,
+        required: true,
+      },
     },
 
     content: {
@@ -36,8 +42,8 @@ const brandSchema = new Schema(
   { timestamps: true }
 );
 
-brandSchema.pre("save", function (next) {
-  if (this.name && !this.slug) {
+brandSchema.pre("validate", function (next) {
+  if (this.isModified("name") || this.isNew) {
     this.slug = slugify(this.name, { lower: true });
   }
 
