@@ -4,8 +4,8 @@ const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
 const { uploadPublicFile } = require("../../../middlewares/uploadMiddleware");
-const { createBrandValidation } = require("./brand.validation");
-const { createBrand } = require("./brand.controller");
+const { createBrandValidation, getBrandsValidation } = require("./brand.validation");
+const { createBrand, getBrands } = require("./brand.controller");
 
 const router = Router();
 
@@ -17,6 +17,7 @@ router
     uploadPublicFile.single("logo"),
     validate(createBrandValidation),
     createBrand
-  );
+  )
+  .get(validate(getBrandsValidation), getBrands);
 
 module.exports = router;

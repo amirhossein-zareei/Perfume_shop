@@ -1,4 +1,5 @@
 const { Brand } = require("../../../models/index");
+const APIFeatures = require("../../../utils/apiFeatures");
 const sendSuccessResponse = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
@@ -31,6 +32,27 @@ exports.createBrand = async (req, res, next) => {
     await newBrand.save();
 
     return sendSuccessResponse(res, "Brand created successfully.", newBrand);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBrands = async (req, res, next) => {
+  try {
+    const totalBrands = await Brand.countDocuments();
+
+    const features = new APIFeatures(Brand.find(), req.query).sort().paginate();
+    const brands = await features.query.select("name logo.url").lean();
+
+    return sendSuccessResponse(res, "", {
+      brands,
+      pagination: {
+        total: totalBrands,
+        page: features.page,
+        limit: features.limit,
+        totalPages: Math.ceil(totalBrands / features.limit),
+      },
+    });
   } catch (err) {
     next(err);
   }

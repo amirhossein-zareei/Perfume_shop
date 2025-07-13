@@ -2,6 +2,9 @@ class APIFeatures {
   constructor(query, queryString) {
     this.query = query;
     this.queryString = queryString;
+
+    this.page = 1;
+    this.limit = 10;
   }
 
   paginate() {
@@ -10,6 +13,9 @@ class APIFeatures {
     const skip = (page - 1) * limit;
 
     this.query = this.query.skip(skip).limit(limit);
+
+    this.page = page;
+    this.limit = limit;
 
     return this;
   }
