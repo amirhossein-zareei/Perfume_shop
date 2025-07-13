@@ -201,12 +201,22 @@ exports.getOrders = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const query = Order.find({ userId });
+    const totalOrders = await User.countDocuments({ userId });
 
-    const features = new APIFeatures(query, req.query).sort().paginate();
+    const features = new APIFeatures(Order.find({ userId }), req.query)
+      .sort()
+      .paginate();
     const orders = await features.query;
 
-    return sendSuccess(res, "", orders);
+    return sendSuccess(res, "", {
+      orders,
+      pagination: {
+        total: totalOrders,
+        page: features.page,
+        limit: features.limit,
+        totalPages: Math.ceil(totalOrders / features.limit),
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -214,9 +224,9 @@ exports.getOrders = async (req, res, next) => {
 
 exports.getUsers = async (req, res, next) => {
   try {
-    const query = User.find();
+    const totalUsers = await User.countDocuments();
 
-    const features = new APIFeatures(query, req.query).sort().paginate();
+    const features = new APIFeatures(User.find(), req.query).sort().paginate();
     const users = await features.query
       .select("name email avatarPublicId")
       .lean();
@@ -228,7 +238,15 @@ exports.getUsers = async (req, res, next) => {
       delete user.avatarPublicId;
     });
 
-    return sendSuccess(res, "", users);
+    return sendSuccess(res, "", {
+      users,
+      pagination: {
+        total: totalUsers,
+        page: features.page,
+        limit: features.limit,
+        totalPages: Math.ceil(totalUsers / features.limit),
+      },
+    });
   } catch (err) {
     next(err);
   }
