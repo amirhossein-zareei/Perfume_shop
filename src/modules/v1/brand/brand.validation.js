@@ -40,7 +40,20 @@ const createBrandValidation = {
 
 const getBrandsValidation = createListOptionsValidation();
 
+const slugValidation = {
+  params: joi.object({
+    slug: joi.string().trim().min(2).max(50).required().messages({
+      "string.base": "Brand slug must be a string.",
+      "string.empty": "Brand slug is required.",
+      "string.min": "Brand slug must be at least 2 characters long.",
+      "string.max": "Brand slug must not exceed 50 characters.",
+      "any.required": "Brand slug is required.",
+    }),
+  }),
+};
+
 module.exports = {
   createBrandValidation,
   getBrandsValidation,
+  slugValidation,
 };

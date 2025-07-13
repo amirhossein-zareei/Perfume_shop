@@ -42,7 +42,7 @@ exports.getBrands = async (req, res, next) => {
     const totalBrands = await Brand.countDocuments();
 
     const features = new APIFeatures(Brand.find(), req.query).sort().paginate();
-    const brands = await features.query.select("name logo.url").lean();
+    const brands = await features.query.select("name slug logo.url").lean();
 
     return sendSuccessResponse(res, "", {
       brands,
@@ -53,6 +53,40 @@ exports.getBrands = async (req, res, next) => {
         totalPages: Math.ceil(totalBrands / features.limit),
       },
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getBrand = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const brand = await Brand.findOne({ slug }).lean();
+
+    if (!brand) {
+      throw new AppError("Brand not found.", 404);
+    }
+
+    return sendSuccessResponse(res, "", brand);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteBrand = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const brand = await Brand.findOneAndDelete({ slug })
+      .select("name slug")
+      .lean();
+
+    if (!brand) {
+      throw new AppError("Brand not found.", 404);
+    }
+
+    return sendSuccessResponse(res, "Brand deleted successfully.", brand);
   } catch (err) {
     next(err);
   }
