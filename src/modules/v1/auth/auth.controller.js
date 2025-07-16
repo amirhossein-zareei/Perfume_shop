@@ -125,7 +125,10 @@ exports.login = async (req, res, next) => {
     }
 
     const accessToken = generateAccessToken(user);
-    const refreshToken = await generateRefreshToken(user._id);
+    const refreshToken = await generateRefreshToken(
+      user._id,
+      user.tokenVersion
+    );
 
     setRefreshTokenCookie(res, refreshToken);
 
@@ -134,6 +137,7 @@ exports.login = async (req, res, next) => {
     return sendSuccess(res, "Login successful", {
       id: user._id,
       name: user.name,
+      role: user.role,
       avatarUrl,
       accessToken,
     });
@@ -168,7 +172,10 @@ exports.refreshToken = async (req, res, next) => {
       throw new AppError("Access to this account has been suspended.", 403);
     }
 
-    const newRefreshToken = await generateRefreshToken(userId);
+    const newRefreshToken = await generateRefreshToken(
+      userId,
+      user.tokenVersion
+    );
 
     const newAccessToken = generateAccessToken(user);
 
@@ -196,8 +203,10 @@ exports.changePassword = async (req, res, next) => {
     if (!isPasswordMatch) {
       throw new AppError("The old password you entered incorrect.", 400);
     }
+    await performLogout(req, res);
 
     user.password = newPassword;
+    user.tokenVersion = ++user.tokenVersion;
     await user.save();
 
     return sendSuccess(res, "Password changed successfully.");
@@ -249,6 +258,7 @@ exports.resetPassword = async (req, res, next) => {
     }
 
     user.password = newPassword;
+    user.tokenVersion = ++user.tokenVersion;
     await user.save();
 
     await passwordResetTokenHandler.delete(resetToken);
@@ -304,6 +314,13 @@ exports.verifyEmail = async (req, res, next) => {
 
     if (user.isBanned) {
       throw new AppError("Access to this account has been suspended.", 403);
+    }
+
+    if (!user.isActive) {
+      throw new AppError(
+        "Cannot verify email for a deactivated account. Please contact support.",
+        403
+      );
     }
 
     user.isVerified = true;

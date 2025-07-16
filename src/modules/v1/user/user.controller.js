@@ -23,7 +23,11 @@ exports.deleteMe = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    await User.findByIdAndUpdate(userId, { isActive: false }, { new: true });
+    await User.findByIdAndUpdate(
+      userId,
+      { isActive: false, $inc: { tokenVersion: 1 } },
+      { new: true }
+    );
 
     await performLogout(req, res);
 
@@ -280,7 +284,7 @@ exports.changeRole = async (req, res, next) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { role },
+      { role, $inc: { tokenVersion: 1 } },
       { new: true }
     )
       .select("name email role")
@@ -306,7 +310,7 @@ exports.banUser = async (req, res, next) => {
 
     const bannedUser = await User.findByIdAndUpdate(
       userId,
-      { isBanned: true },
+      { isBanned: true, $inc: { tokenVersion: 1 } },
       { new: true }
     )
       .select("name email role isBanned")

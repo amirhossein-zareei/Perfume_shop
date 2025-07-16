@@ -38,6 +38,7 @@ const generateAccessToken = (user) => {
         id: user._id,
         role: user.role,
         jti: uuidv4(),
+        tokenVersion: user.tokenVersion,
       },
       auth.accessTokenSecretKey,
       { expiresIn: auth.accessTokenExpiresIn + "m" }
@@ -49,7 +50,7 @@ const generateAccessToken = (user) => {
   }
 };
 
-const generateRefreshToken = async (userId) => {
+const generateRefreshToken = async (userId, tokenVersion) => {
   try {
     const jti = uuidv4();
     const currentUserId = userId.toString();
@@ -58,6 +59,7 @@ const generateRefreshToken = async (userId) => {
       {
         id: currentUserId,
         jti,
+        tokenVersion,
       },
       auth.refreshTokenSecretKey,
       { expiresIn: auth.refreshTokenExpiresIn + "d" }

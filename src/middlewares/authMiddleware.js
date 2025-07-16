@@ -30,9 +30,20 @@ exports.auth = async (req, res, next) => {
       );
     }
 
+    if (!user.isActive) {
+      throw new AppError("Your account is deactivated.", 403);
+    }
+
     if (user.isBanned) {
       await performLogout(req, res);
       throw new AppError("Access to this account has been suspended.", 403);
+    }
+
+    if (payload.tokenVersion !== user.tokenVersion) {
+      throw new AppError(
+        "Token expired due to a security event. Please log in again.",
+        401
+      );
     }
 
     req.user = user;
