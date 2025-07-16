@@ -31,7 +31,7 @@ exports.createBrand = async (req, res, next) => {
 
     await newBrand.save();
 
-    return sendSuccessResponse(res, "Brand created successfully.", newBrand);
+    return sendSuccessResponse(res, "Brand created successfully.", newBrand, 201);
   } catch (err) {
     next(err);
   }

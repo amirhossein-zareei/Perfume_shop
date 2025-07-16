@@ -24,9 +24,14 @@ const categorySchema = new Schema(
     },
 
     icon: {
-      type: String,
-      default: null,
-      required: false,
+      url: {
+        type: String,
+        default: null,
+      },
+      publicId: {
+        type: String,
+        default: null,
+      },
     },
 
     isActive: {
@@ -40,8 +45,8 @@ const categorySchema = new Schema(
 
 categorySchema.index({ slug: 1 }, { unique: true });
 
-categorySchema.pre("save", function (next) {
-  if (this.name && !this.slug) {
+categorySchema.pre("validate", function (next) {
+  if (this.isModified("name") || this.isNew) {
     this.slug = slugify(this.name, { lower: true });
   }
 
