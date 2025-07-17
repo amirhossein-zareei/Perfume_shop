@@ -32,6 +32,22 @@ const createCategoryValidation = {
   }),
 };
 
+const getCategoriesValidation = createListOptionsValidation;
+
+const slugValidation = {
+  params: joi.object({
+    slug: joi.string().trim().min(2).max(50).required().messages({
+      "string.base": "Category slug must be a string.",
+      "string.empty": "Category slug is required.",
+      "string.min": "Category slug must be at least 2 characters long.",
+      "string.max": "Category slug must not exceed 50 characters.",
+      "any.required": "Category slug is required.",
+    }),
+  }),
+};
+
 module.exports = {
   createCategoryValidation,
+  getCategoriesValidation,
+  slugValidation,
 };

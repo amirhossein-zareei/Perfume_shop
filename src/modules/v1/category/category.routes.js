@@ -4,8 +4,12 @@ const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
 const { uploadPublicFile } = require("../../../middlewares/uploadMiddleware");
-const {createCategoryValidation} = require("./category.validation");
-const {createCategory} = require("./category.controller");
+const {
+  createCategoryValidation,
+  getCategoriesValidation,
+  slugValidation,
+} = require("./category.validation");
+const { createCategory, getCategories, getCategory } = require("./category.controller");
 
 const router = Router();
 
@@ -17,6 +21,9 @@ router
     uploadPublicFile.single("icon"),
     validate(createCategoryValidation),
     createCategory
-  );
+  )
+  .get(validate(getCategoriesValidation), getCategories);
+
+router.route("/:slug").get(validate(slugValidation), getCategory)
 
 module.exports = router;
