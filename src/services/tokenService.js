@@ -113,7 +113,7 @@ const verifyRefreshToken = async (token) => {
       );
     }
 
-    return payload.id;
+    return { userId: payload.id, tokenVersion: payload.tokenVersion };
   } catch (err) {
     throw err;
   }

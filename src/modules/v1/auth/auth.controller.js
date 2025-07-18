@@ -160,7 +160,9 @@ exports.refreshToken = async (req, res, next) => {
   try {
     const refreshTokenFromCookie = getAndValidateRefreshTokenCookie(req);
 
-    const userId = await verifyRefreshToken(refreshTokenFromCookie);
+    const { userId, tokenVersion } = await verifyRefreshToken(
+      refreshTokenFromCookie
+    );
 
     const user = await User.findById(userId).lean();
 
@@ -168,8 +170,19 @@ exports.refreshToken = async (req, res, next) => {
       throw new AppError("User associated with this token not found.", 403);
     }
 
+    if (!user.isActive) {
+      throw new AppError("Your account is deactivated.", 403);
+    }
+
     if (user.isBanned) {
       throw new AppError("Access to this account has been suspended.", 403);
+    }
+
+    if (tokenVersion !== user.tokenVersion) {
+      throw new AppError(
+        "Token expired due to a security event. Please log in again.",
+        401
+      );
     }
 
     const newRefreshToken = await generateRefreshToken(
