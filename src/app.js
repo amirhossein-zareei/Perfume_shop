@@ -7,6 +7,7 @@ const AppError = require("./utils/AppError");
 const authRouter = require("./modules/v1/auth/auth.routes");
 const userRouter = require("./modules/v1/user/user.routes");
 const brandRouter = require("./modules/v1/brand/brand.routes");
+const categoryRouter = require("./modules/v1/category/category.routes");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/brands", brandRouter);
+app.use("/api/v1/categories", categoryRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {

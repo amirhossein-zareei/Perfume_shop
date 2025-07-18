@@ -13,9 +13,11 @@ const {
 const {
   createCategory,
   getCategories,
+  getAllCategoriesForAdmin,
   getCategory,
   deleteCategory,
   updatedCategory,
+  reactivateCategory,
 } = require("./category.controller");
 
 const router = Router();
@@ -31,6 +33,14 @@ router
   )
   .get(validate(getCategoriesValidation), getCategories);
 
+router.get(
+  "/all",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(getCategoriesValidation),
+  getAllCategoriesForAdmin
+);
+
 router
   .route("/:slug")
   .get(validate(slugValidation), getCategory)
@@ -45,7 +55,14 @@ router
     roleGuardMiddleware("ADMIN"),
     uploadPublicFile.single("icon"),
     validate(updatedCategoryValidation),
-    updatedCategory,
+    updatedCategory
   );
 
+router.patch(
+  "/:slug/reactivate",
+  auth,
+  roleGuardMiddleware("ADMIN"),
+  validate(slugValidation),
+  reactivateCategory
+);
 module.exports = router;

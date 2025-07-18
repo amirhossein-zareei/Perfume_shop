@@ -1,6 +1,7 @@
 const { Category } = require("../../../models");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
+const APIFeatures = require("../../../utils/apiFeatures");
 
 const _validateParentCategory = async (parentId) => {
   if (parentId) {
@@ -74,6 +75,33 @@ exports.getCategories = async (req, res, next) => {
       "Categories retrieved successfully.",
       nestedCategories
     );
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllCategoriesForAdmin = async (req, res, next) => {
+  try {
+    const totalCategories = await Category.countDocuments();
+
+    const features = new APIFeatures(Category.find(), req.query)
+      .sort()
+      .paginate();
+      
+    const categories = await features.query
+      .select("name slug isActive parentId icon.url")
+      .populate("parentId", "name")
+      .lean();
+
+    return sendSuccess(res, "", {
+      categories: categories,
+      pagination: {
+        total: totalCategories,
+        page: features.page,
+        limit: features.limit,
+        totalPages: Math.ceil(totalCategories / features.limit),
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -162,11 +190,32 @@ exports.updatedCategory = async (req, res, next) => {
 
     const updatedCategory = await category.save();
 
-    return sendSuccess(
-      res,
-      "Category updated successfully.",
-      updatedCategory
-    );
+    return sendSuccess(res, "Category updated successfully.", updatedCategory);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.reactivateCategory = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const category = await Category.findOne({ slug });
+
+    if (!category) {
+      throw new AppError("Category not found.", 404);
+    }
+
+    if (category.isActive) {
+      throw new AppError("This category is already active.", 400);
+    }
+
+    category.isActive = true;
+    await category.save();
+
+    return sendSuccess(res, "Category reactivated successfully.", {
+      name: category.name,
+    });
   } catch (err) {
     next(err);
   }
