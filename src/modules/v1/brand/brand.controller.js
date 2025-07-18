@@ -31,7 +31,12 @@ exports.createBrand = async (req, res, next) => {
 
     await newBrand.save();
 
-    return sendSuccessResponse(res, "Brand created successfully.", newBrand, 201);
+    return sendSuccessResponse(
+      res,
+      "Brand created successfully.",
+      newBrand,
+      201
+    );
   } catch (err) {
     next(err);
   }
@@ -94,7 +99,7 @@ exports.deleteBrand = async (req, res, next) => {
 
 exports.updateBrand = async (req, res, next) => {
   try {
-    const { name, content, website } = req.body;
+    const { name } = req.body;
     const { slug } = req.params;
     const logoFile = req.file;
 
@@ -102,6 +107,17 @@ exports.updateBrand = async (req, res, next) => {
 
     if (!brand) {
       throw new AppError("Brand not found.", 404);
+    }
+
+    if (name && name !== brand.name) {
+      const existingBrandWithNewName = await Brand.findOne({
+        name,
+        _id: { $ne: brand._id },
+      });
+
+      if (existingBrandWithNewName) {
+        throw new AppError("This brand name is already in use.", 409);
+      }
     }
 
     if (logoFile) {
