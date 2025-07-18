@@ -46,8 +46,32 @@ const slugValidation = {
   }),
 };
 
+const updatedCategoryValidation = {
+  body: createBodyObjectSchema({
+    name: joi.string().trim().min(3).max(50).messages({
+      "string.base": "Category name must be a string.",
+      "string.empty": "Category name cannot be empty.",
+      "string.min": "Category name must be at least 3 characters long.",
+      "string.max": "Category name cannot be longer than 50 characters.",
+    }),
+
+    parentId: joi
+      .string()
+      .pattern(/^[0-9a-fA-F]{24}$/)
+      .optional()
+      .default(null)
+      .messages({
+        "string.base": "Parent ID must be a string.",
+        "string.pattern.base": "Parent ID has an invalid format.",
+      }),
+  }),
+
+  params: slugValidation.params,
+};
+
 module.exports = {
   createCategoryValidation,
   getCategoriesValidation,
   slugValidation,
+  updatedCategoryValidation,
 };

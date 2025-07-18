@@ -2,6 +2,16 @@ const { Category } = require("../../../models");
 const sendSuccess = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
+const _validateParentCategory = async (parentId) => {
+  if (parentId) {
+    const isParentIdExists = await Category.exists({ _id: parentId });
+
+    if (!isParentIdExists) {
+      throw new AppError("The specified parent dose not exists.", 400);
+    }
+  }
+};
+
 exports.createCategory = async (req, res, next) => {
   try {
     const { name, parentId } = req.body;
@@ -13,13 +23,7 @@ exports.createCategory = async (req, res, next) => {
       throw new AppError("A category with this name already exists.", 409);
     }
 
-    if (parentId) {
-      const isParentIdExists = await Category.exists({ _id: parentId });
-
-      if (!isParentIdExists) {
-        throw new AppError("The specified parent dose not exists.", 400);
-      }
-    }
+    await _validateParentCategory(parentId);
 
     const newCategory = new Category({
       name,
@@ -40,7 +44,7 @@ exports.createCategory = async (req, res, next) => {
 exports.getCategories = async (req, res, next) => {
   try {
     const allCategories = await Category.find({ isActive: true })
-      .select("name slug icon.url")
+      .select("name slug parentId icon.url")
       .lean();
 
     const categoryMap = new Map();
@@ -86,6 +90,83 @@ exports.getCategory = async (req, res, next) => {
     }
 
     return sendSuccess(res, "", category);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteCategory = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const category = await Category.findOne({ slug });
+
+    if (!category) {
+      throw new AppError("Category not found.", 404);
+    }
+
+    if (!category.isActive) {
+      throw new AppError("This category is already deactivated.", 400);
+    }
+
+    category.isActive = false;
+    await category.save();
+
+    return sendSuccess(res, "Category deactivated successfully.", {
+      name: category.name,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updatedCategory = async (req, res, next) => {
+  try {
+    const { name, parentId } = req.body;
+    const { slug } = req.params;
+    const iconFile = req.file;
+
+    const category = await Category.findOne({ slug });
+
+    if (!category) {
+      throw new AppError("Category not found.", 404);
+    }
+
+    if (name && name !== category.name) {
+      const existingCategoryWithNewName = await Category.findOne({
+        name,
+        _id: { $ne: category._id },
+      });
+
+      if (existingCategoryWithNewName) {
+        throw new AppError("This category name is already in use.", 409);
+      }
+    }
+
+    await _validateParentCategory(parentId);
+
+    Object.keys(req.body).forEach((key) => {
+      category[key] = req.body[key];
+    });
+
+    if (iconFile) {
+      const publicId = category.icon.publicId;
+
+      if (publicId) {
+        await deleteFiles(publicId);
+      }
+
+      category.icon.url = iconFile.path;
+      category.icon.publicId = iconFile.filename;
+    }
+
+    const updatedCategory = await category.save();
+
+    return sendSuccess(
+      res,
+      "Category updated successfully.",
+      updatedCategory
+    );
   } catch (err) {
     next(err);
   }
