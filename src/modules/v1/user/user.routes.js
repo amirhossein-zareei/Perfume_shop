@@ -3,17 +3,11 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
+const validateObjectIdMiddleware = require("../../../middlewares/validateObjectIdMiddleware");
 const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
 const {
   updateMeValidation,
-  createAddressValidation,
-  updateAddressValidation,
-  deleteAddressValidation,
-  getUserValidation,
   changeRoleValidation,
-  banUserValidation,
-  unbanUserValidation,
-  reactivateUserValidation,
   getOrdersValidation,
   getUsersValidation,
 } = require("./user.validation");
@@ -23,9 +17,6 @@ const {
   updateMe,
   uploadProfileImage,
   getAddresses,
-  createAddress,
-  updateAddress,
-  deleteAddress,
   getUserAddresses,
   getOrders,
   getUsers,
@@ -53,23 +44,19 @@ router.post(
   uploadProfileImage
 );
 
-router
-  .route("/me/addresses")
-  .get(getAddresses)
-  .post(validate(createAddressValidation), createAddress);
+router.route("/me/addresses").get(getAddresses);
 
-router
-  .route("/me/addresses/:addressId")
-  .patch(validate(updateAddressValidation), updateAddress)
-  .delete(validate(deleteAddressValidation), deleteAddress);
-
-router.get("/:userId/addresses", roleGuardMiddleware("ADMIN"), getUserAddresses);
+router.get(
+  "/:userId/addresses",
+  roleGuardMiddleware("ADMIN"),
+  validateObjectIdMiddleware("userId"),
+  getUserAddresses
+);
 
 router.get("/me/orders", validate(getOrdersValidation), getOrders);
 
 router.get(
   "/",
-
   roleGuardMiddleware("ADMIN"),
   validate(getUsersValidation),
   getUsers
@@ -77,37 +64,38 @@ router.get(
 
 router
   .route("/:userId")
-  .get(roleGuardMiddleware("ADMIN"), validate(getUserValidation), getUser);
+  .get(
+    roleGuardMiddleware("ADMIN"),
+    validateObjectIdMiddleware("userId"),
+    getUser
+  );
 
 router.patch(
   "/:userId/role",
-
   roleGuardMiddleware("ADMIN"),
+  validateObjectIdMiddleware("userId"),
   validate(changeRoleValidation),
   changeRole
 );
 
 router.patch(
   "/:userId/ban",
-
   roleGuardMiddleware("ADMIN"),
-  validate(banUserValidation),
+  validateObjectIdMiddleware("userId"),
   banUser
 );
 
 router.patch(
   "/:userId/unban",
-
   roleGuardMiddleware("ADMIN"),
-  validate(unbanUserValidation),
+  validateObjectIdMiddleware("userId"),
   unbanUser
 );
 
 router.patch(
   "/:userId/reactivate",
-
   roleGuardMiddleware("ADMIN"),
-  validate(reactivateUserValidation),
+  validateObjectIdMiddleware("userId"),
   reactivateUser
 );
 
