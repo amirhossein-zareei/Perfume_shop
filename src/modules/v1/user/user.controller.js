@@ -201,6 +201,29 @@ exports.deleteAddress = async (req, res, next) => {
   }
 };
 
+exports.getUserAddresses = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const userExists = await User.findOne({ _id: userId });
+
+    if (!userExists) {
+      throw new AppError("User not found.", 404);
+    }
+
+    const userAddresses = await Address.find({ userId })
+      .select("-userId")
+      .lean();
+
+    return sendSuccess(res, "", {
+      username: userExists.name,
+      addresses: userAddresses,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getOrders = async (req, res, next) => {
   try {
     const userId = req.user._id;

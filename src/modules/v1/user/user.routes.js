@@ -26,6 +26,7 @@ const {
   createAddress,
   updateAddress,
   deleteAddress,
+  getUserAddresses,
   getOrders,
   getUsers,
   getUser,
@@ -62,6 +63,8 @@ router
   .patch(validate(updateAddressValidation), updateAddress)
   .delete(validate(deleteAddressValidation), deleteAddress);
 
+router.get("/:userId/addresses", roleGuardMiddleware("ADMIN"), getUserAddresses);
+
 router.get("/me/orders", validate(getOrdersValidation), getOrders);
 
 router.get(
@@ -74,7 +77,7 @@ router.get(
 
 router
   .route("/:userId")
-  .get(validate(getUserValidation), roleGuardMiddleware("ADMIN"), getUser);
+  .get(roleGuardMiddleware("ADMIN"), validate(getUserValidation), getUser);
 
 router.patch(
   "/:userId/role",
