@@ -32,3 +32,5 @@ router
     validateObjectIdMiddleware("addressId"),
     deleteAddress
   );
+
+module.exports = router;

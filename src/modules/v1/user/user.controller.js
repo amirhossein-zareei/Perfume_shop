@@ -134,7 +134,7 @@ exports.getOrders = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const totalOrders = await User.countDocuments({ userId });
+    const totalOrders = await Order.countDocuments({ userId });
 
     const features = new APIFeatures(Order.find({ userId }), req.query)
       .sort()

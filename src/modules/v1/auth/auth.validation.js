@@ -1,17 +1,9 @@
 const joi = require("joi");
 
-const createBodyObjectSchema = (fields) => {
-  return joi.object(fields).required().unknown(false).messages({
-    "object.base": "Request body must be an object",
-    "any.required": "Request body is required",
-  });
-};
-
-const createParamsObjectSchema = (fields) => {
-  return joi.object(fields).unknown(false).messages({
-    "object.base": "Request params must be an object",
-  });
-};
+const {
+  createBodyObjectSchema,
+  createParamsObjectSchema,
+} = require("../../../utils/validationHelpers");
 
 const emailSchema = joi
   .string()

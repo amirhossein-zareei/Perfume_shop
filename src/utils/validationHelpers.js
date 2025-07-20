@@ -35,6 +35,21 @@ const createListOptionsValidation = (validSortKeys = ["newest", "oldest"]) => {
   };
 };
 
+const createBodyObjectSchema = (fields) => {
+  return joi.object(fields).required().unknown(false).messages({
+    "object.base": "Request body must be an object",
+    "any.required": "Request body is required",
+  });
+};
+
+const createParamsObjectSchema = (fields) => {
+  return joi.object(fields).unknown(false).messages({
+    "object.base": "Request params must be an object",
+  });
+};
+
 module.exports = {
   createListOptionsValidation,
+  createBodyObjectSchema,
+  createParamsObjectSchema,
 };

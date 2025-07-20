@@ -1,11 +1,6 @@
 const joi = require("joi");
 
-const createBodyObjectSchema = (fields) => {
-  return joi.object(fields).required().unknown(false).messages({
-    "object.base": "Request body must be an object",
-    "any.required": "Request body is required",
-  });
-};
+const { createBodyObjectSchema } = require("../../../utils/validationHelpers");
 
 const createAddressValidation = {
   body: createBodyObjectSchema({
@@ -116,5 +111,4 @@ const updateAddressValidation = {
 module.exports = {
   createAddressValidation,
   updateAddressValidation,
-  deleteAddressValidation,
 };
