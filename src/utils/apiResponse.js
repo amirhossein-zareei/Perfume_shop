@@ -1,5 +1,5 @@
 // Helper function to format success response
-const sendSuccess = (res, message = "success", data, statusCode = 200) => {
+exports.sendSuccess = (res, message = "success", data, statusCode = 200) => {
   return res.status(statusCode).json({
     success: true,
     message,
@@ -7,4 +7,11 @@ const sendSuccess = (res, message = "success", data, statusCode = 200) => {
   });
 };
 
-module.exports = sendSuccess;
+exports.generatePaginationData = (totalItems, features) => {
+  return {
+    total: totalItems,
+    page: features.page,
+    limit: features.limit,
+    totalPages: Math.ceil(totalItems / features.limit),
+  };
+};

@@ -1,5 +1,8 @@
 const { Category } = require("../../../models");
-const sendSuccess = require("../../../utils/apiResponse");
+const {
+  sendSuccess,
+  generatePaginationData,
+} = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const APIFeatures = require("../../../utils/apiFeatures");
 
@@ -93,14 +96,11 @@ exports.getAllCategoriesForAdmin = async (req, res, next) => {
       .populate("parentId", "name")
       .lean();
 
+    pagination = generatePaginationData(totalCategories, features);
+
     return sendSuccess(res, "", {
       categories: categories,
-      pagination: {
-        total: totalCategories,
-        page: features.page,
-        limit: features.limit,
-        totalPages: Math.ceil(totalCategories / features.limit),
-      },
+      pagination,
     });
   } catch (err) {
     next(err);

@@ -1,6 +1,9 @@
 const { User, Address, City, State, Order } = require("../../../models");
 const { performLogout } = require("../../../services/tokenService");
-const sendSuccess = require("../../../utils/apiResponse");
+const {
+  sendSuccess,
+  generatePaginationData,
+} = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const {
   deleteFiles,
@@ -141,14 +144,11 @@ exports.getOrders = async (req, res, next) => {
       .paginate();
     const orders = await features.query;
 
+    pagination = generatePaginationData(totalOrders, features);
+
     return sendSuccess(res, "", {
       orders,
-      pagination: {
-        total: totalOrders,
-        page: features.page,
-        limit: features.limit,
-        totalPages: Math.ceil(totalOrders / features.limit),
-      },
+      pagination,
     });
   } catch (err) {
     next(err);
@@ -171,14 +171,11 @@ exports.getUsers = async (req, res, next) => {
       delete user.avatarPublicId;
     });
 
+    pagination = generatePaginationData(totalUsers, features);
+
     return sendSuccess(res, "", {
       users,
-      pagination: {
-        total: totalUsers,
-        page: features.page,
-        limit: features.limit,
-        totalPages: Math.ceil(totalUsers / features.limit),
-      },
+      pagination,
     });
   } catch (err) {
     next(err);

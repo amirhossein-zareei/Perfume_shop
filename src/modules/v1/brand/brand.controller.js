@@ -1,7 +1,10 @@
 const { Brand } = require("../../../models/index");
 const { deleteFiles } = require("../../../services/cloudinaryService");
 const APIFeatures = require("../../../utils/apiFeatures");
-const sendSuccessResponse = require("../../../utils/apiResponse");
+const {
+  sendSuccess,
+  generatePaginationData,
+} = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
 exports.createBrand = async (req, res, next) => {
@@ -31,12 +34,7 @@ exports.createBrand = async (req, res, next) => {
 
     await newBrand.save();
 
-    return sendSuccessResponse(
-      res,
-      "Brand created successfully.",
-      newBrand,
-      201
-    );
+    return sendSuccess(res, "Brand created successfully.", newBrand, 201);
   } catch (err) {
     next(err);
   }
@@ -49,14 +47,11 @@ exports.getBrands = async (req, res, next) => {
     const features = new APIFeatures(Brand.find(), req.query).sort().paginate();
     const brands = await features.query.select("name slug logo.url").lean();
 
-    return sendSuccessResponse(res, "", {
+    pagination = generatePaginationData(totalBrands, features);
+
+    return sendSuccess(res, "", {
       brands,
-      pagination: {
-        total: totalBrands,
-        page: features.page,
-        limit: features.limit,
-        totalPages: Math.ceil(totalBrands / features.limit),
-      },
+      pagination,
     });
   } catch (err) {
     next(err);
@@ -73,7 +68,7 @@ exports.getBrand = async (req, res, next) => {
       throw new AppError("Brand not found.", 404);
     }
 
-    return sendSuccessResponse(res, "", brand);
+    return sendSuccess(res, "", brand);
   } catch (err) {
     next(err);
   }
@@ -91,7 +86,7 @@ exports.deleteBrand = async (req, res, next) => {
       throw new AppError("Brand not found.", 404);
     }
 
-    return sendSuccessResponse(res, "Brand deleted successfully.", brand);
+    return sendSuccess(res, "Brand deleted successfully.", brand);
   } catch (err) {
     next(err);
   }
@@ -133,11 +128,7 @@ exports.updateBrand = async (req, res, next) => {
 
     const updatedBrand = await brand.save();
 
-    return sendSuccessResponse(
-      res,
-      "Brand updated successfully.",
-      updatedBrand
-    );
+    return sendSuccess(res, "Brand updated successfully.", updatedBrand);
   } catch (err) {
     next(err);
   }

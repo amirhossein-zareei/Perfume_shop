@@ -1,5 +1,5 @@
 const { User } = require("../../../models/index");
-const sendSuccess = require("../../../utils/apiResponse");
+const { sendSuccess } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 const logger = require("../../../utils/logger");
 const { app } = require("../../../config/env");
