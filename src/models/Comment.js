@@ -26,18 +26,19 @@ const commentSchema = new Schema({
     required: true,
   },
 
-  replies: [
-    {
+  adminReply: {
+    adminId: {
       type: Schema.Types.ObjectId,
-      ref: "Comment",
-      required: false,
+      ref: "User",
     },
-  ],
+    content: String,
+    createdAt: Date,
+  },
 
-  isApproved: {
-    type: Boolean,
-    default: false,
-    required: false,
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
   },
 
   createdAt: {
