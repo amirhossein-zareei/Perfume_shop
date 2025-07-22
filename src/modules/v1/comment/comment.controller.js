@@ -112,3 +112,28 @@ exports.changeCommentStatus = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.deleteComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+
+    const deletedComment = await Comment.findByIdAndDelete(commentId);
+
+    if (!deletedComment) {
+      throw new AppError("Comment not found.", 404);
+    }
+
+    if (deletedComment.status === "approved") {
+      await Product.findByIdAndUpdate(deletedComment.productId, {
+        $inc: {
+          ratingsCount: -1,
+          ratingsSum: -deletedComment.rating,
+        },
+      });
+    }
+
+    return sendSuccess(res, "Comment deleted successfully.");
+  } catch (err) {
+    next(err);
+  }
+};

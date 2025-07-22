@@ -11,7 +11,7 @@ const {
 const {
   getComments,
   changeCommentStatus,
-  // deleteComment,
+  deleteComment,
 } = require("./comment.controller");
 
 const router = Router();
@@ -27,5 +27,6 @@ router.route("/:commentId")
     validate(changeCommentStatusValidation),
     changeCommentStatus
   )
+  .delete(validateObjectIdMiddleware("commentId"), deleteComment);
 
 module.exports = router;

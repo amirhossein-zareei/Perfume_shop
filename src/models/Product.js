@@ -70,11 +70,15 @@ const productSchema = new Schema(
 
     volumes: [volumeSchema],
 
-    averageRating: {
+    ratingsSum: {
+      type: Number,
+      default: 0,
+    },
+
+    ratingsCount: {
       type: Number,
       min: 0,
-      max: 5,
-      default: 5,
+      default: 0,
     },
 
     discount: {
