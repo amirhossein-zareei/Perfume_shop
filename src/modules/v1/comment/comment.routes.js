@@ -11,7 +11,7 @@ const {
 const {
   getComments,
   changeCommentStatus,
-  deleteComment,
+  // deleteComment,
 } = require("./comment.controller");
 
 const router = Router();
@@ -20,5 +20,12 @@ router.use(auth);
 router.use(roleGuardMiddleware("ADMIN"));
 
 router.get("/", validate(getAdminCommentsValidation), getComments);
+
+router.route("/:commentId")
+  .patch(
+    validateObjectIdMiddleware("commentId"),
+    validate(changeCommentStatusValidation),
+    changeCommentStatus
+  )
 
 module.exports = router;

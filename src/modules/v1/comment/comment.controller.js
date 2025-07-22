@@ -62,3 +62,53 @@ exports.getComments = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.changeCommentStatus = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const { status: newStatus, replyContent } = req.body;
+
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+      throw new AppError("Comment not found.", 404);
+    }
+
+    const oldStatus = comment.status;
+    comment.status = newStatus;
+
+    if (replyContent) {
+      comment.adminReply = {
+        adminId: req.user._id,
+        content: replyContent,
+        createdAt: new Date(),
+      };
+    }
+    await comment.save();
+
+    const isApproved = (status) => status === "approved";
+
+    const wasApproved = isApproved(oldStatus);
+    const isNowApproved = isApproved(newStatus);
+
+    const ratingChange =
+      wasApproved === isNowApproved
+        ? 0
+        : isNowApproved
+        ? comment.rating
+        : -comment.rating;
+
+    if (ratingChange !== 0) {
+      await Product.findByIdAndUpdate(comment.productId, {
+        $inc: {
+          ratingsCount: ratingChange > 0 ? 1 : -1,
+          ratingsSum: ratingChange,
+        },
+      });
+    }
+
+    return sendSuccess(res, "Comment updated successfully.", comment);
+  } catch (err) {
+    next(err);
+  }
+};
