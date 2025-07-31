@@ -4,7 +4,7 @@ const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
 const validateObjectIdMiddleware = require("../../../middlewares/validateObjectIdMiddleware");
-const { uploadPrivateFile } = require("../../../middlewares/uploadMiddleware");
+const { uploadAvatar } = require("../../../middlewares/uploadMiddleware");
 const {
   updateMeValidation,
   changeRoleValidation,
@@ -40,7 +40,7 @@ router
 router.post(
   "/me/avatar",
 
-  uploadPrivateFile.single("profileImage"),
+  uploadAvatar.single("profileImage"),
   uploadProfileImage
 );
 

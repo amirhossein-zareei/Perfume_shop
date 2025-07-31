@@ -76,7 +76,7 @@ exports.register = async (req, res, next) => {
       email,
       password,
       role: isFirstUser ? "ADMIN" : "USER",
-      avatarPublicId: "profiles_images/cu2y7fkd8irfo16pixpx",
+      avatarPublicId: "profiles_avatar/pm0qdva4jxzpqxledf7e",
     });
 
     await newUser.save();

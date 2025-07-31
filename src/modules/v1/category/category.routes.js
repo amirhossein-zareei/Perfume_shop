@@ -3,7 +3,7 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
-const { uploadPublicFile } = require("../../../middlewares/uploadMiddleware");
+const { uploadIcon } = require("../../../middlewares/uploadMiddleware");
 const {
   createCategoryValidation,
   getCategoriesValidation,
@@ -27,7 +27,7 @@ router
   .post(
     auth,
     roleGuardMiddleware("ADMIN"),
-    uploadPublicFile.single("icon"),
+    uploadIcon.single("icon"),
     validate(createCategoryValidation),
     createCategory
   )
@@ -53,7 +53,7 @@ router
   .patch(
     auth,
     roleGuardMiddleware("ADMIN"),
-    uploadPublicFile.single("icon"),
+    uploadIcon.single("icon"),
     validate(updatedCategoryValidation),
     updatedCategory
   );

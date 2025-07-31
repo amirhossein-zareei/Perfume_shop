@@ -3,7 +3,7 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
-const { uploadPublicFile } = require("../../../middlewares/uploadMiddleware");
+const { uploadBrandLogo } = require("../../../middlewares/uploadMiddleware");
 const {
   createBrandValidation,
   getBrandsValidation,
@@ -25,7 +25,7 @@ router
   .post(
     auth,
     roleGuardMiddleware("ADMIN"),
-    uploadPublicFile.single("logo"),
+    uploadBrandLogo.single("logo"),
     validate(createBrandValidation),
     createBrand
   )
@@ -43,7 +43,7 @@ router
   .patch(
     auth,
     roleGuardMiddleware("ADMIN"),
-    uploadPublicFile.single("logo"),
+    uploadBrandLogo.single("logo"),
     validate(updateBrandValidation),
     updateBrand
   );
