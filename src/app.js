@@ -10,6 +10,7 @@ const brandRouter = require("./modules/v1/brand/brand.routes");
 const categoryRouter = require("./modules/v1/category/category.routes");
 const addressRouter = require("./modules/v1/address/address.routes.js");
 const commentRouter = require("./modules/v1/comment/comment.routes.js");
+const productRouter = require("./modules/v1/product/product.routes.js");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/addresses", addressRouter);
 app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/products", productRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {

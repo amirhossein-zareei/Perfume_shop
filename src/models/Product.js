@@ -1,7 +1,14 @@
 const { Schema, model } = require("mongoose");
+const slugify = require("slugify");
 
 const volumeSchema = new Schema(
   {
+    type: {
+      type: String,
+      enum: ["bottle", "decant"],
+      required: true,
+    },
+
     size: {
       type: Number,
       required: true,
@@ -13,10 +20,18 @@ const volumeSchema = new Schema(
       required: true,
     },
 
-    isOriginalPackaging: {
+    stock: {
+      type: Number,
+      min: 0,
+      default: 0,
+      required: function () {
+        return this.type === "bottle";
+      },
+    },
+
+    isActive: {
       type: Boolean,
-      default: false,
-      required: false,
+      default: true,
     },
   },
   { _id: false }
@@ -26,6 +41,7 @@ const productSchema = new Schema(
   {
     name: {
       type: String,
+      unique: true,
       trim: true,
       required: true,
     },
@@ -44,13 +60,14 @@ const productSchema = new Schema(
     },
 
     coverImage: {
-      type: String,
-      required: true,
+      url: { type: String, required: true },
+      publicId: { type: String, required: true },
     },
 
     galleryImages: [
       {
-        type: String,
+        url: { type: String, required: true },
+        publicId: { type: String, required: true },
       },
     ],
 
@@ -94,9 +111,38 @@ const productSchema = new Schema(
       default: true,
     },
   },
-  { timestamps: true, strict: true }
+  {
+    timestamps: true,
+    strict: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
-productSchema.index({ slug: 1, isActive: 1 });
+volumeSchema.virtual("priceAfterDiscount").get(function () {
+  const productDiscount = this.parent().discount;
+
+  if (!productDiscount || productDiscount === 0) return this.price;
+
+  const discountAmount = this.price * (productDiscount / 100);
+
+  return Math.round(this.price - discountAmount);
+});
+
+productSchema.index({ slug: 1, name: 1 });
+
+productSchema.virtual("averageRating").get(function () {
+  if (this.ratingsCount === 0) return 0;
+
+  return parseFloat((this.ratingsSum / this.ratingsCount).toFixed(1));
+});
+
+productSchema.pre("validate", function (next) {
+  if (this.isModified("name") || this.isNew) {
+    this.slug = slugify(this.name, { lower: true });
+  }
+
+  next();
+});
 
 module.exports = model("Product", productSchema);
