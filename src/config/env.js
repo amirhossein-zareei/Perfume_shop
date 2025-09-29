@@ -19,17 +19,9 @@ module.exports = {
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
   },
 
-  mongo: {
-    uri: process.env.MONGO_URI,
-  },
+  mongoUrl: process.env.MONGO_URL,
 
-  redis: {
-    host: process.env.REDIS_HOST,
-    port: Number(process.env.REDIS_PORT),
-    username: process.env.REDIS_USERNAME,
-    password: process.env.REDIS_PASSWORD,
-    tls: process.env.REDIS_TLS === "true",
-  },
+  redisUrl: process.env.REDIS_URL,
 
   cloudinaryConfigs: {
     name: process.env.CLOUDINARY_CLOUD_NAME,

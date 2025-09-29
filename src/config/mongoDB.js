@@ -1,12 +1,10 @@
 const mongoose = require("mongoose");
 
-const { mongo } = require("./env");
+const { mongoUrl } = require("./env");
 
 const connectMongoDB = async () => {
   try {
-    const uri = mongo.uri;
-
-    await mongoose.connect(uri);
+    await mongoose.connect(mongoUrl);
 
     console.log("✅ Successfully connected to MongoDB");
   } catch (err) {

@@ -1,14 +1,8 @@
 const { Redis } = require("ioredis");
 
-const { redis } = require("./env");
+const { redisUrl } = require("./env");
 
-const client = new Redis({
-  host: redis.host,
-  port: redis.port,
-  password: redis.password,
-  tls: redis.tls ? {} : undefined,
-  lazyConnect: true,
-});
+const client = new Redis(redisUrl, { lazyConnect: true });
 
 const connectRedis = async () => {
   try {
