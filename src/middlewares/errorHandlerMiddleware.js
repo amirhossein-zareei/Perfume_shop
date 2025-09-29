@@ -33,13 +33,19 @@ module.exports = async (err, req, res, next) => {
   const message = err.message;
   const errors = err.errors;
 
-  logger.error(`${err.message}`, {
+  const logDetails = {
     method: req.method,
     url: req.originalUrl,
     ip: req.ip,
     stack: err.stack,
     errors: err.errors || null,
-  });
+  };
+
+  if (statusCode >= 500) {
+    logger.error(`${err.message}`, logDetails);
+  } else {
+    logger.warn(`${err.message}`, logDetails);
+  }
 
   const response = {
     status,
