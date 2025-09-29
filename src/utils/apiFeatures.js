@@ -1,10 +1,15 @@
 class APIFeatures {
-  constructor(query, queryString) {
-    this.query = query;
+  constructor(queryOrModel, queryString) {
     this.queryString = queryString;
 
-    this.page = 1;
-    this.limit = 10;
+    if (typeof queryOrModel.aggregate === "function") {
+      this.model = queryOrModel;
+      this.mode = "aggregate";
+      this.pipeline = [];
+    } else {
+      this.query = queryOrModel;
+      this.mode = "find";
+    }
   }
 
   paginate() {
@@ -12,7 +17,11 @@ class APIFeatures {
     const limit = parseInt(this.queryString.limit) || 10;
     const skip = (page - 1) * limit;
 
-    this.query = this.query.skip(skip).limit(limit);
+    if (this.mode === "aggregate") {
+      this.pipeline.push({ $skip: skip }, { $limit: limit });
+    } else {
+      this.query = this.query.skip(skip).limit(limit);
+    }
 
     this.page = page;
     this.limit = limit;
@@ -21,19 +30,31 @@ class APIFeatures {
   }
 
   sort() {
+    const sortKey = this.queryString.sort || "newest";
+
     const sortMapping = {
       newest: { createdAt: -1 },
       oldest: { createdAt: 1 },
+      cheapest: { price: 1 },
+      mostExpensive: { price: -1 },
     };
 
-    const sortKey = this.queryString.sort;
+    const sortOption = sortMapping[sortKey] || sortMapping.newest;
 
-    if (sortKey && sortMapping[sortKey]) {
-      this.query = this.query.sort(sortMapping[sortKey]);
+    if (this.mode === "aggregate") {
+      this.pipeline.push({ $sort: sortOption });
     } else {
-      this.query = this.query.sort(sortMapping["newest"]);
+      this.query = this.query.sort(sortMapping[sortKey]);
     }
 
+    return this;
+  }
+  calculateStartingPrice() {
+    if (this.mode !== "aggregate") return this;
+
+    this.pipeline.push({
+      $addFields: { price: { $min: "$volumes.price" }, volumes: "$$REMOVE" },
+    });
     return this;
   }
 }
