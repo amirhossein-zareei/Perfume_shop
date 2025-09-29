@@ -105,6 +105,13 @@ const crateProductValidation = {
   }),
 };
 
+const getProducts = createListOptionsValidation([
+  "newest",
+  "oldest",
+  "cheapest",
+  "mostExpensive",
+]);
 module.exports = {
   crateProductValidation,
+  getProducts,
 };

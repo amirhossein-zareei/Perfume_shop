@@ -96,7 +96,7 @@ exports.getAllCategoriesForAdmin = async (req, res, next) => {
       .populate("parentId", "name")
       .lean();
 
-    pagination = generatePaginationData(totalCategories, features);
+    const pagination = generatePaginationData(totalCategories, features);
 
     return sendSuccess(res, "", {
       categories: categories,

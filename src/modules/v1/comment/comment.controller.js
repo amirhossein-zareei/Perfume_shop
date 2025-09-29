@@ -52,7 +52,7 @@ exports.getComments = async (req, res, next) => {
         : null,
     }));
 
-    pagination = generatePaginationData(totalComments, feature);
+    const pagination = generatePaginationData(totalComments, feature);
 
     return sendSuccess(res, "", {
       comments: processedComments,

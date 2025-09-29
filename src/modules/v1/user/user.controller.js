@@ -144,7 +144,7 @@ exports.getOrders = async (req, res, next) => {
       .paginate();
     const orders = await features.query;
 
-    pagination = generatePaginationData(totalOrders, features);
+    const pagination = generatePaginationData(totalOrders, features);
 
     return sendSuccess(res, "", {
       orders,
@@ -171,7 +171,7 @@ exports.getUsers = async (req, res, next) => {
       delete user.avatarPublicId;
     });
 
-    pagination = generatePaginationData(totalUsers, features);
+    const pagination = generatePaginationData(totalUsers, features);
 
     return sendSuccess(res, "", {
       users,

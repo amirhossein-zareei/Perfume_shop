@@ -47,7 +47,7 @@ exports.getBrands = async (req, res, next) => {
     const features = new APIFeatures(Brand.find(), req.query).sort().paginate();
     const brands = await features.query.select("name slug logo.url").lean();
 
-    pagination = generatePaginationData(totalBrands, features);
+    const pagination = generatePaginationData(totalBrands, features);
 
     return sendSuccess(res, "", {
       brands,

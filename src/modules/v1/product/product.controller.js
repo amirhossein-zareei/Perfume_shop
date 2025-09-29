@@ -1,6 +1,8 @@
 const { Product, Brand, Category } = require("../../../models");
+const APIFeatures = require("../../../utils/apiFeatures");
 const {
   sendSuccess,
+  generatePaginationData,
 } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
@@ -50,6 +52,41 @@ exports.crateProduct = async (req, res, next) => {
     await newProduct.save();
 
     return sendSuccess(res, "Product created successfully", newProduct, 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getPublicProducts = async (req, res, next) => {
+  try {
+    let features = new APIFeatures(Product, req.query)
+      .calculateStartingPrice()
+      .sort()
+      .paginate();
+
+    features.pipeline.unshift({
+      $match: { isActive: true },
+    });
+
+    features.pipeline.push({
+      $project: {
+        name: 1,
+        slug: 1,
+        price: 1,
+      },
+    });
+
+    const [totalProducts, products] = await Promise.all([
+      Product.countDocuments({ isActive: true }),
+      Product.aggregate(features.pipeline),
+    ]);
+
+    const pagination = generatePaginationData(totalProducts, features);
+
+    return sendSuccess(res, "", {
+      products,
+      pagination,
+    });
   } catch (err) {
     next(err);
   }
