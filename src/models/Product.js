@@ -34,7 +34,7 @@ const volumeSchema = new Schema(
       default: true,
     },
   },
-  { _id: false }
+  { _id: false, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
 const productSchema = new Schema(

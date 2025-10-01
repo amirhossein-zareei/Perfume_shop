@@ -14,6 +14,7 @@ exports.crateProduct = async (req, res, next) => {
       brand: brandId,
       volumes,
       categories: categoryIds,
+      discount,
     } = req.body;
     const image = req.file;
 
@@ -44,6 +45,7 @@ exports.crateProduct = async (req, res, next) => {
       brand: brandId,
       categories: categoryIds,
       volumes,
+      discount,
       coverImage: {
         url: image.path,
         publicId: image.filename,
