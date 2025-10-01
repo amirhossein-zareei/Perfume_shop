@@ -6,6 +6,38 @@ const {
 } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
+const _buildProductPipeline = () => {
+  const pipeline = [];
+
+  pipeline.push({
+    $addFields: {
+      priceAfterDiscount: {
+        $round: [
+          {
+            $multiply: [
+              "$price",
+              { $subtract: [1, { $divide: ["$discount", 100] }] },
+            ],
+          },
+          0,
+        ],
+      },
+    },
+  });
+
+  pipeline.push({
+    $project: {
+      name: 1,
+      slug: 1,
+      coverImage: "$coverImage.url",
+      price: 1,
+      priceAfterDiscount: 1,
+    },
+  });
+
+  return pipeline;
+};
+
 exports.crateProduct = async (req, res, next) => {
   try {
     const {
@@ -66,17 +98,8 @@ exports.getPublicProducts = async (req, res, next) => {
       .sort()
       .paginate();
 
-    features.pipeline.unshift({
-      $match: { isActive: true },
-    });
-
-    features.pipeline.push({
-      $project: {
-        name: 1,
-        slug: 1,
-        price: 1,
-      },
-    });
+    features.pipeline.unshift({ $match: { isActive: true } });
+    features.pipeline.push(..._buildProductPipeline());
 
     const [totalProducts, products] = await Promise.all([
       Product.countDocuments({ isActive: true }),
