@@ -138,3 +138,49 @@ exports.getPublicProduct = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getAllProducts = async (req, res, next) => {
+  try {
+    let features = new APIFeatures(Product, req.query)
+      .calculateStartingPrice()
+      .sort()
+      .paginate();
+
+    features.pipeline.push(..._buildProductPipeline());
+
+    const [totalProducts, products] = await Promise.all([
+      Product.countDocuments(),
+      Product.aggregate(features.pipeline),
+    ]);
+
+    const pagination = generatePaginationData(totalProducts, features);
+
+    return sendSuccess(res, "", {
+      products,
+      pagination,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAdminProduct = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    let product = await Product.findOne({ slug }).select(
+      "-ratingsSum -ratingsCount"
+    );
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    product = product.toJSON();
+    delete product.id;
+
+    return sendSuccess(res, "", product);
+  } catch (err) {
+    next(err);
+  }
+};

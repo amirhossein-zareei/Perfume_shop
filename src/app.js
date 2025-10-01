@@ -29,7 +29,7 @@ app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/addresses", addressRouter);
 app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/products", productRouter);
-app.use("/api/v1/products/admin", productAdminRouter);
+app.use("/api/v1/admin/products/", productAdminRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {
