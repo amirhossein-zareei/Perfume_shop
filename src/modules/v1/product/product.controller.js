@@ -116,3 +116,25 @@ exports.getPublicProducts = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getPublicProduct = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    let product = await Product.findOne({
+      slug,
+      isActive: true,
+    }).select("-ratingsSum -ratingsCount -isActive -__v");
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    product = product.toJSON();
+    delete product.id;
+
+    return sendSuccess(res, "", product);
+  } catch (err) {
+    next(err);
+  }
+};

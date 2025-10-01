@@ -3,6 +3,7 @@ const joi = require("joi");
 const {
   createListOptionsValidation,
   createBodyObjectSchema,
+  createParamsObjectSchema,
 } = require("../../../utils/validationHelpers");
 
 const crateProductValidation = {
@@ -102,16 +103,48 @@ const crateProductValidation = {
         "array.min": "Product must have at least one volume.",
         "any.required": "Volumes are required.",
       }),
+
+    discount: joi
+      .number()
+      .integer()
+      .min(0)
+      .max(100)
+      .default(0)
+      .optional()
+      .messages({
+        "number.base": "Discount must be a number.",
+        "number.integer": "Discount must be an integer value.",
+        "number.min": "Discount cannot be less than 0.",
+        "number.max": "Discount cannot be greater than 100.",
+      }),
   }),
 };
 
-const getProducts = createListOptionsValidation([
+const getProductsValidation = createListOptionsValidation([
   "newest",
   "oldest",
   "cheapest",
   "mostExpensive",
 ]);
+
+const getProductValidation = {
+  params: createParamsObjectSchema({
+    slug: joi
+      .string()
+      .pattern(/^[a-z0-9-]+$/)
+      .required()
+      .messages({
+        "string.base": "Slug must be a string.",
+        "string.empty": "Slug is required.",
+        "string.pattern.base":
+          "Slug can only contain lowercase letters, numbers and hyphens.",
+        "any.required": "Slug is required.",
+      }),
+  }),
+};
+
 module.exports = {
   crateProductValidation,
-  getProducts,
+  getProductsValidation,
+  getProductValidation,
 };
