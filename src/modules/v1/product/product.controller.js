@@ -52,6 +52,25 @@ const _getProducts = async (req, res, project, filter = {}) => {
   });
 };
 
+const _updateProductActiveStatus = async (slug, isActive) => {
+  const product = await Product.findOneAndUpdate({ slug }, { isActive })
+    .select("name slug isActive")
+    .lean();
+
+  if (!product) {
+    throw new AppError("Product not found.", 404);
+  }
+
+  if (product.isActive === isActive) {
+    throw new AppError(
+      `Product is already ${isActive ? "active" : "inactive"}.`,
+      400
+    );
+  }
+
+  return product;
+};
+
 exports.createProduct = async (req, res, next) => {
   try {
     const {
@@ -174,6 +193,32 @@ exports.getAdminProduct = async (req, res, next) => {
     delete product.id;
 
     return sendSuccess(res, "", product);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.activateProduct = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const product = await _updateProductActiveStatus(slug, true);
+    product.isActive = true;
+
+    return sendSuccess(res, "Product activated successfully.", product);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deactivateProduct = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    let product = await _updateProductActiveStatus(slug, false);
+    product.isActive = false;
+
+    return sendSuccess(res, "Product deactivated successfully.", product);
   } catch (err) {
     next(err);
   }

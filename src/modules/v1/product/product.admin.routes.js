@@ -14,6 +14,8 @@ const {
   createProduct,
   getAllProducts,
   getAdminProduct,
+  activateProduct,
+  deactivateProduct,
 } = require("./product.controller");
 const parseJsonFields = require("../../../middlewares/parseJsonFields");
 
@@ -33,5 +35,8 @@ router
   .get(validate(getProductsValidation), getAllProducts);
 
 router.route("/:slug").get(validate(slugValidation), getAdminProduct);
+
+router.patch("/:slug/activate", validate(slugValidation), activateProduct);
+router.patch("/:slug/deactivate", validate(slugValidation), deactivateProduct);
 
 module.exports = router;
