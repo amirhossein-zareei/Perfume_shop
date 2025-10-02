@@ -6,12 +6,12 @@ const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
 const { uploadProductImage } = require("../../../middlewares/uploadMiddleware");
 const validateObjectIdMiddleware = require("../../../middlewares/validateObjectIdMiddleware");
 const {
-  crateProductValidation,
+  createProductValidation,
   getProductsValidation,
-  getProductValidation,
+  slugValidation,
 } = require("./product.validation");
 const {
-  crateProduct,
+  createProduct,
   getAllProducts,
   getAdminProduct,
 } = require("./product.controller");
@@ -27,11 +27,11 @@ router
   .post(
     uploadProductImage.single("coverImage"),
     parseJsonFields(["volumes"]),
-    validate(crateProductValidation),
-    crateProduct
+    validate(createProductValidation),
+    createProduct
   )
   .get(validate(getProductsValidation), getAllProducts);
 
-router.route("/:slug").get(validate(getProductValidation), getAdminProduct);
+router.route("/:slug").get(validate(slugValidation), getAdminProduct);
 
 module.exports = router;

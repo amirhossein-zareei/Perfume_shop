@@ -127,7 +127,7 @@ const getProductsValidation = createListOptionsValidation([
   "mostExpensive",
 ]);
 
-const getProductValidation = {
+const slugValidation = {
   params: createParamsObjectSchema({
     slug: joi
       .string()
@@ -146,5 +146,5 @@ const getProductValidation = {
 module.exports = {
   crateProductValidation,
   getProductsValidation,
-  getProductValidation,
+  slugValidation,
 };

@@ -6,7 +6,7 @@ const {
 } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
-const _buildProductPipeline = () => {
+const _buildProductPipeline = (project) => {
   const pipeline = [];
 
   pipeline.push({
@@ -25,20 +25,34 @@ const _buildProductPipeline = () => {
     },
   });
 
-  pipeline.push({
-    $project: {
-      name: 1,
-      slug: 1,
-      coverImage: "$coverImage.url",
-      price: 1,
-      priceAfterDiscount: 1,
-    },
-  });
+  pipeline.push({ $project: project });
 
   return pipeline;
 };
 
-exports.crateProduct = async (req, res, next) => {
+const _getProducts = async (req, res, project, filter = {}) => {
+  let features = new APIFeatures(Product, req.query)
+    .calculateStartingPrice()
+    .sort()
+    .paginate();
+
+  features.pipeline.unshift({ $match: filter });
+  features.pipeline.push(..._buildProductPipeline(project));
+
+  const [totalProducts, products] = await Promise.all([
+    Product.countDocuments(filter),
+    Product.aggregate(features.pipeline),
+  ]);
+
+  const pagination = generatePaginationData(totalProducts, features);
+
+  return sendSuccess(res, "", {
+    products,
+    pagination,
+  });
+};
+
+exports.createProduct = async (req, res, next) => {
   try {
     const {
       name,
@@ -93,25 +107,15 @@ exports.crateProduct = async (req, res, next) => {
 
 exports.getPublicProducts = async (req, res, next) => {
   try {
-    let features = new APIFeatures(Product, req.query)
-      .calculateStartingPrice()
-      .sort()
-      .paginate();
+    const project = {
+      name: 1,
+      slug: 1,
+      coverImage: "$coverImage.url",
+      price: 1,
+      priceAfterDiscount: 1,
+    };
 
-    features.pipeline.unshift({ $match: { isActive: true } });
-    features.pipeline.push(..._buildProductPipeline());
-
-    const [totalProducts, products] = await Promise.all([
-      Product.countDocuments({ isActive: true }),
-      Product.aggregate(features.pipeline),
-    ]);
-
-    const pagination = generatePaginationData(totalProducts, features);
-
-    return sendSuccess(res, "", {
-      products,
-      pagination,
-    });
+    await _getProducts(req, res, project, { isActive: true });
   } catch (err) {
     next(err);
   }
@@ -124,7 +128,7 @@ exports.getPublicProduct = async (req, res, next) => {
     let product = await Product.findOne({
       slug,
       isActive: true,
-    }).select("-ratingsSum -ratingsCount -isActive -__v");
+    }).select(" -isActive -__v");
 
     if (!product) {
       throw new AppError("Product not found.", 404);
@@ -141,24 +145,16 @@ exports.getPublicProduct = async (req, res, next) => {
 
 exports.getAllProducts = async (req, res, next) => {
   try {
-    let features = new APIFeatures(Product, req.query)
-      .calculateStartingPrice()
-      .sort()
-      .paginate();
+    const project = {
+      name: 1,
+      slug: 1,
+      coverImage: "$coverImage.url",
+      price: 1,
+      priceAfterDiscount: 1,
+      isActive: 1,
+    };
 
-    features.pipeline.push(..._buildProductPipeline());
-
-    const [totalProducts, products] = await Promise.all([
-      Product.countDocuments(),
-      Product.aggregate(features.pipeline),
-    ]);
-
-    const pagination = generatePaginationData(totalProducts, features);
-
-    return sendSuccess(res, "", {
-      products,
-      pagination,
-    });
+    await _getProducts(req, res, project);
   } catch (err) {
     next(err);
   }
@@ -168,9 +164,7 @@ exports.getAdminProduct = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
-    let product = await Product.findOne({ slug }).select(
-      "-ratingsSum -ratingsCount"
-    );
+    let product = await Product.findOne({ slug });
 
     if (!product) {
       throw new AppError("Product not found.", 404);
