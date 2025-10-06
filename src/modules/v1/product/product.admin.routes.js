@@ -16,6 +16,7 @@ const {
   getAdminProduct,
   activateProduct,
   deactivateProduct,
+  addGalleryImages,
 } = require("./product.controller");
 const parseJsonFields = require("../../../middlewares/parseJsonFields");
 
@@ -38,5 +39,13 @@ router.route("/:slug").get(validate(slugValidation), getAdminProduct);
 
 router.patch("/:slug/activate", validate(slugValidation), activateProduct);
 router.patch("/:slug/deactivate", validate(slugValidation), deactivateProduct);
+
+router
+  .route("/:slug/gallery")
+  .post(
+    validate(slugValidation),
+    uploadProductImage.array("images", 5),
+    addGalleryImages
+  );
 
 module.exports = router;

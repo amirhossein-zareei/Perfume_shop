@@ -4,6 +4,7 @@ const {
   sendSuccess,
   generatePaginationData,
 } = require("../../../utils/apiResponse");
+const { deleteFiles } = require("../../../services/cloudinaryService");
 const AppError = require("../../../utils/AppError");
 
 const _buildProductPipeline = (project) => {
@@ -219,6 +220,43 @@ exports.deactivateProduct = async (req, res, next) => {
     product.isActive = false;
 
     return sendSuccess(res, "Product deactivated successfully.", product);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.addGalleryImages = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const newImages = req.files;
+
+    const product = await Product.findOne({ slug });
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    if (!newImages || newImages.length === 0) {
+      throw new AppError("No images gallery", 400);
+    }
+
+    const oldGallery = product.galleryImages;
+
+    if (oldGallery && oldGallery.length > 0) {
+      const oldIds = oldGallery.map((img) => img.publicId);
+
+      await deleteFiles(oldIds);
+    }
+
+    const newGallery = newImages.map((file) => ({
+      url: file.path,
+      publicId: file.filename,
+    }));
+
+    product.galleryImages = newGallery;
+    await product.save();
+
+    return sendSuccess(res, "Gallery updated successfully.", product.galleryImages)
   } catch (err) {
     next(err);
   }
