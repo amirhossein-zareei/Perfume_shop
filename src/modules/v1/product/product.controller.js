@@ -256,7 +256,37 @@ exports.addGalleryImages = async (req, res, next) => {
     product.galleryImages = newGallery;
     await product.save();
 
-    return sendSuccess(res, "Gallery updated successfully.", product.galleryImages)
+    return sendSuccess(
+      res,
+      "Gallery updated successfully.",
+      product.galleryImages
+    );
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.deleteGalleryImages = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const product = await Product.findOne({ slug });
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    if (product.galleryImages.length === 0) {
+      throw new AppError("Gallery is already empty.", 400);
+    }
+
+    const oldIds = product.galleryImages.map((img) => img.publicId);
+    await deleteFiles(oldIds);
+
+    product.galleryImages = [];
+    await product.save();
+
+    return sendSuccess(res, "Gallery deleted successfully.");
   } catch (err) {
     next(err);
   }

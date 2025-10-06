@@ -17,6 +17,7 @@ const {
   activateProduct,
   deactivateProduct,
   addGalleryImages,
+  deleteGalleryImages,
 } = require("./product.controller");
 const parseJsonFields = require("../../../middlewares/parseJsonFields");
 
@@ -46,6 +47,6 @@ router
     validate(slugValidation),
     uploadProductImage.array("images", 5),
     addGalleryImages
-  );
+  ).delete(validate(slugValidation), deleteGalleryImages);
 
 module.exports = router;
