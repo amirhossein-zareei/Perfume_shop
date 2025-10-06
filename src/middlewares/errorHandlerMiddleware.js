@@ -7,23 +7,23 @@ module.exports = async (err, req, res, next) => {
   if (req.file) {
     const publicId = req.file.filename;
 
+    await deleteFiles(publicId);
+
     logger.warn(
       `An error occurred after file upload. Deleting orphan file: ${publicId}`
     );
-
-    await deleteFiles(publicId);
   }
 
   if (req.files) {
     const publicIds = req.files.map((file) => file.filename);
+
+    await deleteFiles(publicIds);
 
     logger.warn(
       `An error occurred after multiple file uploads. Deleting orphan files: ${publicIds.join(
         ", "
       )}`
     );
-
-    await deleteFiles(publicIds);
   }
 
   const isProduction = app.mode === "production";
