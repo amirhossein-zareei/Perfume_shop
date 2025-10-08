@@ -30,9 +30,9 @@ router
   .route("/")
   .post(
     uploadProductImage.single("coverImage"),
-    parseJsonFields(["volumes"]),
+    parseJsonFields(["volumes", "categoryIds"]),
     validate(createProductValidation),
-    createProduct
+    createProduct,
   )
   .get(validate(getProductsValidation), getAllProducts);
 

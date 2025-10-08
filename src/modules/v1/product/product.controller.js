@@ -74,49 +74,52 @@ const _updateProductActiveStatus = async (slug, isActive) => {
 
 exports.createProduct = async (req, res, next) => {
   try {
-    const {
-      name,
-      description,
-      brand: brandId,
-      volumes,
-      categories: categoryIds,
-      discount,
-    } = req.body;
     const image = req.file;
-
     if (!image) {
       throw new AppError("Cover image is required.", 400);
     }
 
-    const isBrandNameExists = await Brand.exists({ _id: brandId });
+    const fieldsToNewProduct = {};
+    [
+      "name",
+      "description",
+      "brandId",
+      "volumes",
+      "categoryIds",
+      "discount",
+    ].forEach((key) => {
+      fieldsToNewProduct[key] = req.body[key];
+    });
+
+    fieldsToNewProduct.coverImage = {
+      url: image.path,
+      publicId: image.filename,
+    };
+
+    const [isProductNameExists, isBrandNameExists, foundCategoryIds] =
+      await Promise.all([
+        Product.exists({ name: fieldsToNewProduct.name }),
+
+        Brand.exists({ _id: fieldsToNewProduct.brandId }),
+
+        Category.find({
+          _id: { $in: fieldsToNewProduct.categoryIds },
+        }).select("_id"),
+      ]);
+
     if (!isBrandNameExists) {
       throw new AppError("Brand not found.", 404);
     }
 
-    const foundCategories = await Category.find({
-      _id: { $in: categoryIds },
-    }).select("_id");
-    if (foundCategories.length !== categoryIds.length) {
+    if (foundCategoryIds.length !== fieldsToNewProduct.categoryIds.length) {
       throw new AppError("One or more categories were not found.", 404);
     }
 
-    const isProductNameExists = await Product.exists({ name });
     if (isProductNameExists) {
       throw new AppError("A product with this name already exists.", 409);
     }
 
-    const newProduct = new Product({
-      name,
-      description,
-      brand: brandId,
-      categories: categoryIds,
-      volumes,
-      discount,
-      coverImage: {
-        url: image.path,
-        publicId: image.filename,
-      },
-    });
+    const newProduct = new Product(fieldsToNewProduct);
     await newProduct.save();
 
     return sendSuccess(res, "Product created successfully", newProduct, 201);

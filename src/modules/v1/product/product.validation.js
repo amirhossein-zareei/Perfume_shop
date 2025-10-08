@@ -6,7 +6,7 @@ const {
   createParamsObjectSchema,
 } = require("../../../utils/validationHelpers");
 
-const crateProductValidation = {
+const createProductValidation = {
   body: createBodyObjectSchema({
     name: joi.string().trim().min(3).max(250).required().messages({
       "string.base": "Product name must be a string.",
@@ -24,7 +24,7 @@ const crateProductValidation = {
       "any.required": "Description is required.",
     }),
 
-    brand: joi
+    brandId: joi
       .string()
       .trim()
       .pattern(/^[0-9a-fA-F]{24}$/)
@@ -36,7 +36,7 @@ const crateProductValidation = {
         "any.required": "Brand is required.",
       }),
 
-    categories: joi
+    categoryIds: joi
       .array()
       .items(
         joi
@@ -144,7 +144,7 @@ const slugValidation = {
 };
 
 module.exports = {
-  crateProductValidation,
+  createProductValidation,
   getProductsValidation,
   slugValidation,
 };

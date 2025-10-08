@@ -71,13 +71,13 @@ const productSchema = new Schema(
       },
     ],
 
-    brand: {
+    brandId: {
       type: Schema.Types.ObjectId,
       ref: "Brand",
       required: true,
     },
 
-    categories: [
+    categoryIds: [
       {
         type: Schema.Types.ObjectId,
         ref: "Category",
