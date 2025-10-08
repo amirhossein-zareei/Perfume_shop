@@ -9,11 +9,13 @@ const {
   createProductValidation,
   getProductsValidation,
   slugValidation,
+  updateProductValidation,
 } = require("./product.validation");
 const {
   createProduct,
   getAllProducts,
   getAdminProduct,
+  updateProduct,
   activateProduct,
   deactivateProduct,
   addGalleryImages,
@@ -32,11 +34,19 @@ router
     uploadProductImage.single("coverImage"),
     parseJsonFields(["volumes", "categoryIds"]),
     validate(createProductValidation),
-    createProduct,
+    createProduct
   )
   .get(validate(getProductsValidation), getAllProducts);
 
-router.route("/:slug").get(validate(slugValidation), getAdminProduct);
+router
+  .route("/:slug")
+  .get(validate(slugValidation), getAdminProduct)
+  .patch(
+    uploadProductImage.single("coverImage"),
+    parseJsonFields(["volumes", "categoryIds"]),
+    validate(updateProductValidation),
+    updateProduct
+  );
 
 router.patch("/:slug/activate", validate(slugValidation), activateProduct);
 router.patch("/:slug/deactivate", validate(slugValidation), deactivateProduct);
@@ -47,6 +57,7 @@ router
     validate(slugValidation),
     uploadProductImage.array("images", 5),
     addGalleryImages
-  ).delete(validate(slugValidation), deleteGalleryImages);
+  )
+  .delete(validate(slugValidation), deleteGalleryImages);
 
 module.exports = router;

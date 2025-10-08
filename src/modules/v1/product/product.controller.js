@@ -202,6 +202,78 @@ exports.getAdminProduct = async (req, res, next) => {
   }
 };
 
+exports.updateProduct = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const fieldsToUpdate = {};
+    [
+      "name",
+      "description",
+      "brandId",
+      "volumes",
+      "categoryIds",
+      "discount",
+    ].forEach((key) => {
+      if (req.body[key] !== undefined) fieldsToUpdate[key] = req.body[key];
+    });
+
+    let [product, isProductNameExists, isBrandNameExists, foundCategoryIds] =
+      await Promise.all([
+        Product.findOne({ slug }),
+
+        fieldsToUpdate.name
+          ? Product.exists({ name: fieldsToUpdate.name })
+          : Promise.resolve(false),
+
+        fieldsToUpdate.brandId
+          ? Brand.exists({ _id: fieldsToUpdate.brandId })
+          : Promise.resolve(false),
+
+        fieldsToUpdate.categoryIds?.length
+          ? Category.find({
+              _id: { $in: fieldsToUpdate.categoryIds },
+            }).select("_id")
+          : Promise.resolve([]),
+      ]);
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    if (isProductNameExists) {
+      throw new AppError("A product with this name already exists.", 409);
+    }
+
+    if (fieldsToUpdate.brandId && !isBrandNameExists) {
+      throw new AppError("Brand not found.", 404);
+    }
+
+    if (
+      fieldsToUpdate.categoryIds?.length &&
+      foundCategoryIds.length !== fieldsToUpdate.categoryIds.length
+    ) {
+      throw new AppError("One or more categories were not found.", 404);
+    }
+
+    if (req.file) {
+      await deleteFiles(product.coverImage.publicId);
+
+      fieldsToUpdate.coverImage = {
+        url: req.file.path,
+        publicId: req.file.filename,
+      };
+    }
+
+    product.set(fieldsToUpdate);
+    await product.save();
+
+    return sendSuccess(res, "", product);
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.activateProduct = async (req, res, next) => {
   try {
     const { slug } = req.params;
