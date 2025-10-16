@@ -1,9 +1,9 @@
 // Helper function to format success response
-exports.sendSuccess = (res, message = "success", data, statusCode = 200) => {
+exports.sendSuccess = (res, message = "success", payload = {}, statusCode = 200) => {
   return res.status(statusCode).json({
     success: true,
     message,
-    data,
+    ...payload,
   });
 };
 

@@ -2,21 +2,21 @@ const { Schema, model } = require("mongoose");
 
 const cartItemSchema = new Schema(
   {
+    cartId: {
+      type: Schema.Types.ObjectId,
+      ref: "Cart",
+      required: true,
+    },
+    
     productId: {
       type: Schema.Types.ObjectId,
       ref: "Product",
       required: true,
     },
 
-    volumeSize: {
-      type: Number,
+    volumeId: {
+      type: Schema.Types.ObjectId,
       required: true,
-    },
-
-    isOriginalPackaging: {
-      type: Boolean,
-      default: false,
-      required: false,
     },
 
     quantity: {
@@ -26,25 +26,19 @@ const cartItemSchema = new Schema(
       required: false,
     },
 
-    unitPrice: {
-      type: Number,
-      min: 0,
-      required: true,
-    },
-
-    totalPrice: {
-      type: Number,
-      min: 0,
-      required: true,
+    isAvailable: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
 );
 
-cartItemSchema.pre("save", function (next) {
-  this.totalPrice = this.unitPrice * this.quantity;
-
-  next();
+cartItemSchema.virtual("product", {
+  ref: "Product",
+  localField: "productId",
+  foreignField: "_id",
+  justOne: true,
 });
 
 module.exports = model("CartItem", cartItemSchema);
