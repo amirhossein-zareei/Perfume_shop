@@ -11,4 +11,6 @@ router.use(auth);
 
 router.route("/").get(getCart);
 
+router.post("/item", validate(cartItemsValidation), addItemToCart);
+
 module.exports = router;

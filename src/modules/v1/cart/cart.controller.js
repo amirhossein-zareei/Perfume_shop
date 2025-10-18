@@ -1,8 +1,9 @@
-const { Cart, CartItem } = require("../../../models");
+const { Cart, CartItem, Product } = require("../../../models");
 const {
   sendSuccess,
   generatePaginationData,
 } = require("../../../utils/apiResponse");
+const AppError = require("../../../utils/AppError");
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -85,6 +86,82 @@ exports.getCart = async (req, res, next) => {
 
     return sendSuccess(res, "Cart retrieved successfully", {
       cart: { _id: cart._id, items: updatedItems, totalPrice, finalPrice },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.addItemToCart = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { productId, volumeId, quantity } = req.body;
+
+    let product = await Product.findOne(
+      {
+        _id: productId,
+        isActive: true,
+      },
+      { volumes: 1 }
+    ).lean();
+
+    if (!product) {
+      throw new AppError("Product or volume not found or inactive.", 404);
+    }
+
+    const volume = product.volumes.find(
+      (v) => v._id.equals(volumeId) && v.isActive
+    );
+
+    if (!volume) {
+      throw new AppError("Volume not found or inactive.", 404);
+    }
+
+    if (volume.type === "bottle" && quantity > volume.stock) {
+      throw new AppError(
+        `Requested quantity exceeds available stock of ${volume.stock}.`,
+        400
+      );
+    }
+
+    let cart = await Cart.findOne({ userId }).populate("items");
+
+    if (!cart) {
+      const newItem = await CartItem.create({
+        productId,
+        volumeId,
+        quantity,
+      });
+
+      cart = await Cart.create({
+        userId,
+        items: [newItem._id],
+      }).populate("items");
+    } else {
+      const existingItem = cart.items.find(
+        (item) =>
+          item.productId?.equals(productId) && item.volumeId?.equals(volumeId)
+      );
+
+      if (!existingItem) {
+        const newItem = await CartItem.create({
+          productId,
+          volumeId,
+          quantity,
+        });
+
+        cart.items.push(newItem._id);
+        await cart.save();
+      } else {
+        await CartItem.findOneAndUpdate(
+          { _id: existingItem._id },
+          { $inc: { quantity } }
+        );
+      }
+    }
+
+    return sendSuccess(res, "Item added to cart successfully.", {
+      totalItemToCart: cart.items.length,
     });
   } catch (err) {
     next(err);
