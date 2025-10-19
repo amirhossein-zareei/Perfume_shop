@@ -1,9 +1,63 @@
+const { ObjectId } = require("mongodb");
+
 const { Cart, CartItem, Product } = require("../../../models");
-const {
-  sendSuccess,
-  generatePaginationData,
-} = require("../../../utils/apiResponse");
+const { sendSuccess } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
+
+const _updateCartItemQuantity = async (userId, itemId, quantityChange) => {
+  const objectItemId = new ObjectId(itemId);
+
+  const cart = await Cart.aggregate([
+    { $match: { userId, items: objectItemId } },
+    {
+      $lookup: {
+        from: "cartitems",
+        localField: "items",
+        foreignField: "_id",
+        as: "items",
+      },
+    },
+  ]);
+
+  if (!cart.length) {
+    throw new AppError("Item not found in cart.", 404);
+  }
+
+  const cartItem = cart[0].items[0];
+
+  const product = await Product.findOne({
+    _id: cartItem.productId,
+    isActive: true,
+    "volumes._id": cartItem.volumeId,
+    "volumes.isActive": true,
+  });
+
+  if (!product) {
+    throw new AppError("Product or volume not found or inactive.", 404);
+  }
+
+  const item = await CartItem.findById(itemId);
+  const newQuantity = item.quantity + Number(quantityChange);
+
+  if (newQuantity < 0 || newQuantity > 10) {
+    return null;
+  }
+
+  if (newQuantity === 0) {
+    await Promise.all([
+      Cart.updateOne({ userId }, { $pull: { items: objectItemId } }),
+      CartItem.deleteOne({ _id: objectItemId }),
+    ]);
+
+    item.quantity = newQuantity;
+    return item;
+  }
+
+  item.quantity = newQuantity;
+  item.save();
+
+  return item;
+};
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -162,6 +216,47 @@ exports.addItemToCart = async (req, res, next) => {
 
     return sendSuccess(res, "Item added to cart successfully.", {
       totalItemToCart: cart.items.length,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.increaseCartItemQuantity = async (req, res, next) => {
+  try {
+    const { itemId } = req.params;
+    const userId = req.user._id;
+    const { quantity } = req.body;
+
+    const cartItem = await _updateCartItemQuantity(userId, itemId, quantity);
+    if (!cartItem) {
+      throw new AppError("Quantity update exceeds allowed limits.", 400);
+    }
+
+    return sendSuccess(res, "Cart item quantity increased successfully.", {
+      itemId: cartItem._id,
+      quantity: cartItem.quantity,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.decreaseCartItemQuantity = async (req, res, next) => {
+  try {
+    const { itemId } = req.params;
+    const userId = req.user._id;
+    const { quantity } = req.body;
+
+    const cartItem = await _updateCartItemQuantity(userId, itemId, -quantity);
+
+    if (!cartItem) {
+      throw new AppError("Quantity update exceeds allowed limits.", 400);
+    }
+
+    return sendSuccess(res, "Cart item quantity decreased successfully.", {
+      itemId: cartItem._id,
+      quantity: cartItem.quantity,
     });
   } catch (err) {
     next(err);
