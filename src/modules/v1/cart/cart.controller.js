@@ -262,3 +262,34 @@ exports.decreaseCartItemQuantity = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.removeCartItem = async (req, res, next) => {
+  try {
+    const { itemId } = req.params;
+    const objectItemId = new ObjectId(itemId);
+
+    const userId = req.user._id;
+
+    const cart = await Cart.findOneAndUpdate(
+      {
+        userId,
+        items: objectItemId,
+      },
+      {
+        $pull: { items: objectItemId },
+      }
+    );
+
+    if (!cart) {
+      throw new AppError("Item not found in cart.", 404);
+    }
+
+    await CartItem.deleteOne({ _id: objectItemId });
+
+    return sendSuccess(res, "Cart item removed successfully.", {
+      itemId: itemId,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

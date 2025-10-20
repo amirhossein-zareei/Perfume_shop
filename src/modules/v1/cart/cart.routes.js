@@ -12,6 +12,7 @@ const {
   addItemToCart,
   increaseCartItemQuantity,
   decreaseCartItemQuantity,
+  removeCartItem,
 } = require("./cart.controller");
 
 const router = Router();
@@ -33,6 +34,12 @@ router.patch(
   validate(validateObjectIdMiddleware("itemId")),
   validate(quantityValidation),
   decreaseCartItemQuantity
+);
+
+router.delete(
+  "/item/:itemId",
+  validate(validateObjectIdMiddleware("itemId")),
+  removeCartItem
 );
 
 module.exports = router;
