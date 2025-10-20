@@ -9,6 +9,7 @@ const {
 } = require("./cart.validation");
 const {
   getCart,
+  deleteCartItems,
   addItemToCart,
   increaseCartItemQuantity,
   decreaseCartItemQuantity,
@@ -19,7 +20,7 @@ const router = Router();
 
 router.use(auth);
 
-router.route("/").get(getCart);
+router.route("/").get(getCart).delete(deleteCartItems);
 
 router.post("/item", validate(cartItemsValidation), addItemToCart);
 

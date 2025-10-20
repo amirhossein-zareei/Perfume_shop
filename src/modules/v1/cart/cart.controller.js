@@ -146,6 +146,27 @@ exports.getCart = async (req, res, next) => {
   }
 };
 
+exports.deleteCartItems = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const clearedCart = await Cart.findOneAndUpdate(
+      { userId },
+      { items: [] }
+    );
+
+    if (!clearedCart) {
+      throw new AppError("Cart not found.", 404);
+    }
+
+    await CartItem.deleteMany({ _id: { $in: clearedCart.items } });
+
+    return sendSuccess(res, "Cart cleared successfully.", {});
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.addItemToCart = async (req, res, next) => {
   try {
     const userId = req.user._id;
