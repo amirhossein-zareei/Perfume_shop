@@ -4,7 +4,7 @@ const AppError = require("./AppError");
 exports.setRefreshTokenCookie = (res, refreshToken) => {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: app.mode === "production",
+    secure: app.nodeEnv === "production",
     sameSite: "Strict",
     maxAge: auth.refreshTokenExpiresIn * 24 * 60 * 60 * 1000,
   });
@@ -13,7 +13,7 @@ exports.setRefreshTokenCookie = (res, refreshToken) => {
 exports.clearRefreshTokenCookie = (res) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
-    secure: app.mode === "production",
+    secure: app.nodeEnv === "production",
     sameSite: "Strict",
   });
 };

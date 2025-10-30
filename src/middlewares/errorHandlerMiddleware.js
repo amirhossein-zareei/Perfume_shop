@@ -26,7 +26,7 @@ module.exports = async (err, req, res, next) => {
     );
   }
 
-  const isProduction = app.mode === "production";
+  const isProduction = app.nodeEnv === "production";
 
   const status = err.status || "error";
   const statusCode = err.statusCode || 500;

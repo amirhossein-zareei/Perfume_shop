@@ -3,7 +3,7 @@ const path = require("path");
 
 const { app } = require("../config/env");
 
-const isProduction = app.mode === "production";
+const isProduction = app.nodeEnv === "production";
 
 const logger = createLogger({
   level: "info",

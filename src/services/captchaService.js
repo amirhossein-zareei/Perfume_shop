@@ -16,9 +16,12 @@ exports.generateCaptcha = async () => {
 
     await setCode(`captcha:${captchaId}`, captcha.text.toLowerCase());
 
+    const svgBase64 = Buffer.from(captcha.data).toString("base64");
+    const captchaImage = `data:image/svg+xml;base64,${svgBase64}`;
+
     return {
       captchaId,
-      captcha: captcha.data,
+      captcha: captchaImage,
     };
   } catch (err) {
     throw err;

@@ -2,7 +2,17 @@ const { Redis } = require("ioredis");
 
 const { redisUrl } = require("./env");
 
-const client = new Redis(redisUrl, { lazyConnect: true });
+const redisOption = {
+  lazyConnect: true,
+};
+
+if (redisUrl.startsWith("rediss://")) {
+  redisOption.tls = {
+    rejectUnauthorized: false,
+  };
+}
+
+const client = new Redis(redisUrl, redisOption);
 
 const connectRedis = async () => {
   try {

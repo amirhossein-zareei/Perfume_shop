@@ -2,7 +2,7 @@ const dotenv = require("dotenv");
 
 const { connectMongoDB, connectRedis, env } = require("./config/index");
 
-const isProductionMode = env.app.mode === "production";
+const isProductionMode = env.app.nodeEnv === "production";
 if (!isProductionMode) {
   dotenv.config();
 }
