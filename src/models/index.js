@@ -7,7 +7,6 @@ module.exports = {
   CartItem: require("./CartItem"),
   Category: require("./Category"),
   Checkout: require("./Checkout"),
-  CheckoutItem: require("./CheckoutItem"),
   Comment: require("./Comment"),
   Coupon: require("./Coupon"),
   CouponUsage: require("./CouponUsage"),
