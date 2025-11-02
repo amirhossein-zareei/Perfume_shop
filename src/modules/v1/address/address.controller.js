@@ -1,5 +1,5 @@
 const { Address, City, State } = require("../../../models");
-const sendSuccess = require("../../../utils/apiResponse");
+const { sendSuccess } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
 
 const _checkAddressAccess = async (user, addressId) => {

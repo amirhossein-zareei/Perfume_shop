@@ -13,6 +13,7 @@ const commentRouter = require("./modules/v1/comment/comment.routes.js");
 const productRouter = require("./modules/v1/product/product.routes.js");
 const productAdminRouter = require("./modules/v1/product/product.admin.routes.js");
 const cartRouter = require("./modules/v1/cart/cart.routes.js");
+const checkoutRouter = require("./modules/v1/checkout/checkout.routes.js");
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/v1/comments", commentRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/admin/products/", productAdminRouter);
 app.use("/api/v1/cart", cartRouter);
+app.use("/api/v1/checkout", checkoutRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {

@@ -17,7 +17,7 @@ const {
   performLogout,
 } = require("../../../services/tokenService");
 const {
-  sendPasswordRestEmail,
+  sendPasswordResetEmail,
   sendVerificationEmail,
 } = require("../../../services/emailService");
 
@@ -238,7 +238,7 @@ exports.forgotPassword = async (req, res, next) => {
       const resetToken = await passwordResetTokenHandler.generate(user._id);
       const resetUrl = `${app.frontendUrl}/reset-password/${resetToken}`;
 
-      await sendPasswordRestEmail({
+      await sendPasswordResetEmail({
         name: user.name,
         email: user.email,
         url: resetUrl,
