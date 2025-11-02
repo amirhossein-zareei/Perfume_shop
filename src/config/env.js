@@ -28,4 +28,6 @@ module.exports = {
     apiKey: process.env.CLOUDINARY_API_KEY,
     apiSecret: process.env.CLOUDINARY_API_SECRET,
   },
+
+  currency: process.env.DEFAULT_CURRENCY || "USD",
 };

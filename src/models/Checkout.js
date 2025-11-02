@@ -94,13 +94,13 @@ const checkoutSchema = new Schema(
       postalCode: { type: String, required: true },
     },
 
-    totalAmount: {
+    totalPrice: {
       type: Number,
       min: 0,
       required: true,
     },
 
-    finalAmount: {
+    finalPrice: {
       type: Number,
       min: 0,
       required: true,
@@ -128,6 +128,7 @@ const checkoutSchema = new Schema(
       method: {
         type: String,
         enum: ["stripe", "paypal"],
+        default: "paypal",
         required: true,
       },
 

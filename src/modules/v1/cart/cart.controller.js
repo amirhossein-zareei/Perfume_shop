@@ -3,6 +3,7 @@ const { ObjectId } = require("mongodb");
 const { Cart, CartItem, Product } = require("../../../models");
 const { sendSuccess } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
+const { currency } = require("../../../config/env");
 
 const _updateCartItemQuantity = async (userId, itemId, quantityChange) => {
   const objectItemId = new ObjectId(itemId);
@@ -77,7 +78,7 @@ exports.getCart = async (req, res, next) => {
     if (items.length === 0) {
       return sendSuccess(res, "Cart is empty.", {
         cart: {
-          _id: cart._id,
+          id: cart?._id || null,
           items: [],
           totalPrice: 0,
           finalPrice: 0,
@@ -139,7 +140,13 @@ exports.getCart = async (req, res, next) => {
     if (bulkOps.length) await CartItem.bulkWrite(bulkOps);
 
     return sendSuccess(res, "Cart retrieved successfully", {
-      cart: { _id: cart._id, items: updatedItems, totalPrice, finalPrice },
+      cart: {
+        _id: cart._id,
+        items: updatedItems,
+        totalPrice,
+        finalPrice,
+        currency,
+      },
     });
   } catch (err) {
     next(err);
@@ -150,10 +157,7 @@ exports.deleteCartItems = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const clearedCart = await Cart.findOneAndUpdate(
-      { userId },
-      { items: [] }
-    );
+    const clearedCart = await Cart.findOneAndUpdate({ userId }, { items: [] });
 
     if (!clearedCart) {
       throw new AppError("Cart not found.", 404);
@@ -211,7 +215,7 @@ exports.addItemToCart = async (req, res, next) => {
       cart = await Cart.create({
         userId,
         items: [newItem._id],
-      }).populate("items");
+      });
     } else {
       const existingItem = cart.items.find(
         (item) =>

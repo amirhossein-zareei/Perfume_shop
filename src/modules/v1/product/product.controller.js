@@ -6,6 +6,7 @@ const {
 } = require("../../../utils/apiResponse");
 const { deleteFiles } = require("../../../services/cloudinaryService");
 const AppError = require("../../../utils/AppError");
+const { currency } = require("../../../config/env");
 
 const _buildProductPipeline = (project) => {
   const pipeline = [];
@@ -50,6 +51,7 @@ const _getProducts = async (req, res, project, filter = {}) => {
   return sendSuccess(res, "", {
     products,
     pagination,
+    currency,
   });
 };
 
@@ -160,7 +162,7 @@ exports.getPublicProduct = async (req, res, next) => {
     product = product.toJSON();
     delete product.id;
 
-    return sendSuccess(res, "", product);
+    return sendSuccess(res, "", { product, currency });
   } catch (err) {
     next(err);
   }
@@ -196,7 +198,7 @@ exports.getAdminProduct = async (req, res, next) => {
     product = product.toJSON();
     delete product.id;
 
-    return sendSuccess(res, "", product);
+    return sendSuccess(res, "", { product, currency });
   } catch (err) {
     next(err);
   }
