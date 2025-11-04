@@ -134,12 +134,12 @@ const checkoutSchema = new Schema(
 
       status: {
         type: String,
-        enum: ["pending", "paid", "failed"],
+        enum: ["pending", "cancelled", "failed"],
         default: "pending",
         required: true,
       },
 
-      paymentSessionId: String,
+      sessionId: String,
     },
 
     discount: {

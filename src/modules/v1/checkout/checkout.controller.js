@@ -6,6 +6,11 @@ const {
   createItemSnapshot,
 } = require("../../../services/cartService");
 const { sendSuccess } = require("../../../utils/apiResponse");
+const {
+  createPaymentSession,
+  cancelPaymentSession,
+  verifyPayment,
+} = require("../../../services/payment/paymentService");
 const AppError = require("../../../utils/AppError");
 
 exports.createCheckout = async (req, res, next) => {
@@ -132,17 +137,63 @@ exports.updateCheckout = async (req, res, next) => {
   }
 };
 
-exports.deleteCheckout = async (req, res, next) => {
+exports.cancelCheckout = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const deletedCheckout = await Checkout.findOneAndDelete({ userId });
+    const checkout = await Checkout.findOne({
+      userId,
+      "payment.status": "pending",
+    });
 
-    if (!deletedCheckout) {
+    if (!checkout) {
       throw new AppError("Checkout not found.", 404);
     }
 
+    if (checkout.payment.sessionId) {
+      await cancelPaymentSession(
+        checkout.payment.method,
+        checkout.payment.sessionId
+      );
+    }
+
+    checkout.payment.status = "cancelled";
+    await checkout.save();
+
     return sendSuccess(res, "Checkout session deleted successfully.");
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.initiatePayment = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const checkout = await Checkout.findOne({
+      userId,
+      "payment.status": "pending",
+    });
+
+    if (!checkout) {
+      throw new AppError("No active checkout session found.", 404);
+    }
+
+    if (checkout.payment.sessionId) {
+      throw new AppError(
+        "An active payment link already exists. Complete or cancel it first.",
+        409
+      );
+    }
+
+    const paymentData = await createPaymentSession(checkout);
+
+    checkout.payment.sessionId = paymentData.sessionId;
+    await checkout.save();
+
+    return sendSuccess(res, "Payment link generated.", {
+      paymentUrl: paymentData.paymentUrl,
+    });
   } catch (err) {
     next(err);
   }

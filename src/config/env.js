@@ -30,4 +30,10 @@ module.exports = {
   },
 
   currency: process.env.DEFAULT_CURRENCY || "USD",
+
+  payment: {
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    paypalClientId: process.env.PAYPAL_CLIENT_ID,
+    paypalClientSecret: process.env.PAYPAL_CLIENT_SECRET
+  }
 };
