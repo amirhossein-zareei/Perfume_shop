@@ -1,4 +1,6 @@
-const { Checkout, Cart, CartItem, Address } = require("../../../models");
+const mongoose = require("mongoose");
+
+const { Checkout, Address, Order, Product } = require("../../../models");
 const {
   getValidatedCartItems,
   calculateCartTotals,
@@ -12,6 +14,7 @@ const {
   verifyPayment,
 } = require("../../../services/payment/paymentService");
 const AppError = require("../../../utils/AppError");
+const { currency } = require("../../../config/env");
 
 exports.createCheckout = async (req, res, next) => {
   try {
@@ -65,7 +68,7 @@ exports.createCheckout = async (req, res, next) => {
         addressLine: address.addressLine,
         postalCode: address.postalCode,
       },
-      currency: "USD",
+      currency,
       totalPrice,
       finalPrice,
     });
@@ -123,10 +126,7 @@ exports.updateCheckout = async (req, res, next) => {
         postalCode: address.postalCode,
       };
     }
-
-    checkout.currency = req.body.currency || checkout.currency;
-    checkout.payment.method = req.body.paymentMethod || checkout.payment.method;
-
+    
     await checkout.save();
 
     return sendSuccess(res, "Checkout session updated successfully.", {
@@ -194,6 +194,121 @@ exports.initiatePayment = async (req, res, next) => {
     return sendSuccess(res, "Payment link generated.", {
       paymentUrl: paymentData.paymentUrl,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.handlePaymentCallback = async (req, res, next) => {
+  try {
+    const { sessionId } = req.query;
+    const userId = req.user._id;
+
+    let paymentMethod;
+    if (sessionId.startsWith("cs_")) {
+      paymentMethod = "stripe";
+    } else {
+      paymentMethod = "paypal";
+    }
+
+    const paymentData = await verifyPayment(paymentMethod, sessionId);
+
+    if (!paymentData.success) {
+      throw new AppError("Payment verification failed.", 400);
+    }
+
+    const existingOrder = await Order.findOne({
+      "payment.transactionId": paymentData.transactionId,
+    }).select("orderNumber");
+
+    if (existingOrder) {
+      return sendSuccess(res, "This payment has already been processed.", {
+        orderNumber: existingOrder.orderNumber,
+      });
+    }
+
+    const checkout = await Checkout.findOne({
+      _id: paymentData.checkoutId,
+      userId,
+    });
+
+    if (!checkout) {
+      //TODO برگشت زدن پول به حساب کاربر
+
+      throw new AppError("Checkout not found. Payment refunded.", 404);
+    }
+
+    if (checkout.payment.status === "cancelled") {
+      //TODO برگشت زدن پول به حساب کاربر
+
+      throw new AppError("Checkout was cancelled. Payment refunded.", 409);
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      const bulkOps = checkout.items
+        .filter((item) => item.volume.type === "bottle")
+        .map((item) => ({
+          updateOne: {
+            filter: {
+              _id: item.product._id,
+              "volumes._id": item.volume._id,
+              "volumes.stock": { $gte: item.quantity },
+            },
+            update: {
+              $inc: { "volumes.$.stock": -item.quantity },
+            },
+          },
+        }));
+
+      if (bulkOps.length > 0) {
+        const result = await Product.bulkWrite(bulkOps, { session });
+
+        if (result.modifiedCount !== bulkOps.length) {
+          //TODO برگشت زدن پول به حساب کاربر
+          throw new AppError("Not enough stock for some items.", 409);
+        }
+      }
+
+      const count = await Order.countDocuments();
+      const orderNumber = `ORD-${Date.now()}-${count + 1}`;
+
+      const order = new Order({
+        userId,
+        items: checkout.items,
+        shippingAddress: checkout.shippingAddress,
+        totalPrice: checkout.totalPrice,
+        finalPrice: checkout.finalPrice,
+        currency: checkout.currency,
+        payment: {
+          method: checkout.payment.method,
+          transactionId: paymentData.transactionId,
+          paidAt: Date.now(),
+        },
+        discount: checkout.discount,
+        statusHistory: {
+          status: "pending",
+        },
+        orderNumber,
+      });
+
+      const [newOrder] = await Promise.all([
+        order.save(session),
+        checkout.deleteOne(session),
+      ]);
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return sendSuccess(res, "Payment verified and order created.", {
+        order: newOrder.toObject(),
+      });
+    } catch (transactionError) {
+      await session.abortTransaction();
+      session.endSession();
+      throw transactionError;
+    }
   } catch (err) {
     next(err);
   }

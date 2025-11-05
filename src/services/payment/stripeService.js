@@ -42,7 +42,7 @@ const createStripeSession = async (checkout) => {
 
 const verifyStripePayment = async (sessionId) => {
   try {
-    const session = await stripe.checkout.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     return {
       success: session.payment_status,

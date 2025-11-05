@@ -16,28 +16,24 @@ const updateCheckoutValidation = {
       "string.empty": "Payment Method cannot be empty.",
       "any.only": "Payment Method must be either 'paypal' or 'stripe'.",
     }),
+  }),
+};
 
-    currency: joi
+const verifyPaymentValidation = {
+  query: joi.object({
+    sessionId: joi
       .string()
       .trim()
-      .valid(
-        "USD", // United States - Dollar
-        "EUR", // European Union - Euro
-        "GBP", // United Kingdom - Pound Sterling
-        "JPY", // Japan - Yen
-        "AUD", // Australia - Dollar
-        "CAD", // Canada - Dollar
-        "CHF", // Switzerland - Franc
-        "CNY", // China - Yuan (Renminbi)
-        "INR", // India - Rupee
-        "BRL" // Brazil - Real
-      )
+      .min(17)
+      .max(100)
+      .required()
       .messages({
-        "string.base": "Currency must be a string.",
-        "string.empty": "Currency cannot be empty.",
-        "any.only": "Currency must be one of the supported currencies.",
+        "string.alphanum": "Session ID must contain only letters and numbers.",
+        "string.min": "Session ID must be at least 17 characters.",
+        "string.max": "Session ID must not exceed 100 characters.",
+        "any.required": "Session ID is required.",
       }),
   }),
 };
 
-module.exports = { updateCheckoutValidation };
+module.exports = { updateCheckoutValidation, verifyPaymentValidation };

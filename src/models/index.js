@@ -11,7 +11,6 @@ module.exports = {
   Coupon: require("./Coupon"),
   CouponUsage: require("./CouponUsage"),
   Order: require("./Order"),
-  OrderItem: require("./OrderItem"),
   Product: require("./Product"),
   Ticket: require("./Ticket"),
   User: require("./User"),

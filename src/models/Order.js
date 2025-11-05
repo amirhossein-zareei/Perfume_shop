@@ -1,5 +1,65 @@
 const { Schema, model } = require("mongoose");
 
+const orderItemSchema = new Schema(
+  {
+    product: {
+      _id: {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+
+      name: {
+        type: String,
+        required: true,
+      },
+
+      slug: {
+        type: String,
+        required: true,
+      },
+
+      coverImage: {
+        type: String,
+        required: true,
+      },
+    },
+
+    volume: {
+      _id: {
+        type: Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+
+      type: {
+        type: String,
+        enum: ["bottle", "decant"],
+        required: true,
+      },
+
+      size: {
+        type: Number,
+        required: true,
+      },
+    },
+
+    quantity: {
+      type: Number,
+      min: 1,
+      default: 1,
+      required: false,
+    },
+
+    unitPrice: {
+      type: Number,
+      min: 0,
+      required: true,
+    },
+  },
+  { _id: false }
+);
+
 const statusHistorySchema = new Schema(
   {
     status: {
@@ -33,33 +93,97 @@ const orderSchema = new Schema(
       required: true,
     },
 
-    items: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "OrderItem",
+    orderNumber: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+
+    items: [orderItemSchema],
+
+    shippingAddress: {
+      name: {
+        type: String,
         required: true,
       },
-    ],
 
-    totalAmount: {
+      phone: {
+        type: String,
+        required: true,
+      },
+
+      stateId: { type: Number, required: true },
+
+      cityId: {
+        type: Schema.Types.ObjectId,
+        ref: "City",
+        required: true,
+      },
+
+      addressLine: { type: String, required: true },
+
+      postalCode: { type: String, required: true },
+    },
+
+    totalPrice: {
       type: Number,
       min: 0,
       required: true,
     },
 
-    statusHistory: [statusHistorySchema],
-
-    shippingAddress: {
-      type: Schema.Types.ObjectId,
-      ref: "Address",
+    finalPrice: {
+      type: Number,
+      min: 0,
       required: true,
     },
 
-    paymentMethod: {
+    currency: {
       type: String,
-      enum: ["stripe", "paypal"],
+      enum: [
+        "USD", // United States - Dollar
+        "EUR", // European Union - Euro
+        "GBP", // United Kingdom - Pound Sterling
+        "JPY", // Japan - Yen
+        "AUD", // Australia - Dollar
+        "CAD", // Canada - Dollar
+        "CHF", // Switzerland - Franc
+        "CNY", // China - Yuan (Renminbi)
+        "INR", // India - Rupee
+        "BRL", // Brazil - Real
+      ],
+      default: "USD",
       required: true,
     },
+
+    payment: {
+      method: {
+        type: String,
+        enum: ["stripe", "paypal"],
+        required: true,
+      },
+
+      transactionId: {
+        type: String,
+        required: true,
+      },
+
+      paidAt: {
+        type: Date,
+        default: Date.now,
+        required: true,
+      },
+    },
+
+    discount: {
+      code: { type: String },
+      amount: {
+        type: Number,
+        min: 0,
+        default: 0,
+      },
+    },
+
+    statusHistory: [statusHistorySchema],
   },
   { timestamps: true }
 );
@@ -74,6 +198,7 @@ orderSchema.set("toJSON", { virtuals: true });
 orderSchema.set("toObject", { virtuals: true });
 
 orderSchema.index({ userId: 1 });
-orderSchema.index({ paymentMethod: 1 });
+orderSchema.index({ orderNumber: 1 });
+orderSchema.index({ "payment.method": 1 });
 
 module.exports = model("Order", orderSchema);

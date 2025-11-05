@@ -28,4 +28,10 @@ router
 
 router.post("/payment", initiatePayment);
 
+router.get(
+  "/callback",
+  validate(verifyPaymentValidation),
+  handlePaymentCallback
+);
+
 module.exports = router;
