@@ -14,6 +14,8 @@ const productRouter = require("./modules/v1/product/product.routes.js");
 const productAdminRouter = require("./modules/v1/product/product.admin.routes.js");
 const cartRouter = require("./modules/v1/cart/cart.routes.js");
 const checkoutRouter = require("./modules/v1/checkout/checkout.routes.js");
+const orderRouter = require("./modules/v1/order/order.routes.js");
+// const orderAdminRouter = require("./modules/v1/order/order.admin.routes.js");
 
 const app = express();
 
@@ -34,6 +36,8 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/admin/products/", productAdminRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/checkout", checkoutRouter);
+app.use("/api/v1/orders", orderRouter);
+app.use("/api/v1/admin/orders", orderAdminRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {
