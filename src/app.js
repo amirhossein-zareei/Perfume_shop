@@ -15,7 +15,7 @@ const productAdminRouter = require("./modules/v1/product/product.admin.routes.js
 const cartRouter = require("./modules/v1/cart/cart.routes.js");
 const checkoutRouter = require("./modules/v1/checkout/checkout.routes.js");
 const orderRouter = require("./modules/v1/order/order.routes.js");
-// const orderAdminRouter = require("./modules/v1/order/order.admin.routes.js");
+const orderAdminRouter = require("./modules/v1/order/order.admin.routes.js");
 
 const app = express();
 
