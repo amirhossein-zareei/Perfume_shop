@@ -7,17 +7,18 @@ const {
   getOrdersValidation,
   orderNumberValidation,
 } = require("./order.validation");
-const { getOrdersForAdmin } = require("./order.controller");
+const { getOrdersForAdmin, getOrderForAdmin} = require("./order.controller");
 
 const router = Router();
 
 router.use(auth);
 router.use(roleGuardMiddleware("ADMIN"));
 
-router.get(
-  "/",
-  validate(getOrdersValidation),
-  getOrdersForAdmin
+router.get("/", validate(getOrdersValidation), getOrdersForAdmin);
+
+router.route("/:orderNumber").get(
+  validate(orderNumberValidation),
+  getOrderForAdmin
 );
 
 module.exports = router;

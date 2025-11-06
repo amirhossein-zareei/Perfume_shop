@@ -122,3 +122,21 @@ exports.getOrdersForAdmin = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getOrderForAdmin = async (req, res, next) => {
+  try {
+    const { orderNumber } = req.params;
+
+    const order = await Order.findOne({ orderNumber })
+      .populate("userId", "email")
+      .lean();
+
+    if (!order) {
+      throw new AppError("Order not found.", 404);
+    }
+
+    return sendSuccess(res, "Order retrieved.", { order });
+  } catch (err) {
+    next(err);
+  }
+};
