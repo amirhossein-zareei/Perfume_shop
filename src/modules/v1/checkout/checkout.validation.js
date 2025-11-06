@@ -24,11 +24,15 @@ const verifyPaymentValidation = {
     sessionId: joi
       .string()
       .trim()
+      .pattern(/^[a-zA-Z0-9._-]+$/)
       .min(17)
       .max(100)
       .required()
       .messages({
-        "string.alphanum": "Session ID must contain only letters and numbers.",
+        "string.base": "Session ID must be a string.",
+        "string.empty": "Session ID cannot be empty.",
+        "string.pattern.base":
+          "Session ID can only contain alphanumeric characters, dots, underscores, and hyphens.",
         "string.min": "Session ID must be at least 17 characters.",
         "string.max": "Session ID must not exceed 100 characters.",
         "any.required": "Session ID is required.",

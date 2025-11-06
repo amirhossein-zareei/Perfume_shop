@@ -1,6 +1,13 @@
 const mongoose = require("mongoose");
 
-const { Checkout, Address, Order, Product } = require("../../../models");
+const {
+  Checkout,
+  Address,
+  Order,
+  Product,
+  Cart,
+  CartItem,
+} = require("../../../models");
 const {
   getValidatedCartItems,
   calculateCartTotals,
@@ -101,7 +108,8 @@ exports.getCheckout = async (req, res, next) => {
 exports.updateCheckout = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const { addressId } = req.body;
+    const { addressId, paymentMethod } = req.body;
+
     const checkout = await Checkout.findOne({ userId });
 
     if (!checkout) {
@@ -126,7 +134,9 @@ exports.updateCheckout = async (req, res, next) => {
         postalCode: address.postalCode,
       };
     }
-    
+
+    checkout.payment.method = paymentMethod || checkout.payment.method;
+
     await checkout.save();
 
     return sendSuccess(res, "Checkout session updated successfully.", {
@@ -293,9 +303,14 @@ exports.handlePaymentCallback = async (req, res, next) => {
         orderNumber,
       });
 
+      const cartItem = await Cart.findOneAndUpdate({ userId }, { items: [] })
+        .select("items")
+        .lean();
+
       const [newOrder] = await Promise.all([
         order.save(session),
         checkout.deleteOne(session),
+        CartItem.deleteMany({ _id: { $in: cartItem.items } }),
       ]);
 
       await session.commitTransaction();
