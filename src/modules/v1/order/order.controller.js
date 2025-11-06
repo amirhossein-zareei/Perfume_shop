@@ -1,4 +1,5 @@
 const { Order } = require("../../../models");
+const { adjustProductStock } = require("../../../services/orderService");
 const APIFeatures = require("../../../utils/apiFeatures");
 const {
   sendSuccess,
@@ -52,6 +53,40 @@ exports.getOrder = async (req, res, next) => {
     }
 
     return sendSuccess(res, "Order retrieved.", { order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.cancelOrder = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { orderNumber } = req.params;
+
+    const order = await Order.findOne({ userId, orderNumber });
+
+    if (!order) {
+      throw new AppError("Order not found.", 404);
+    }
+
+    if (order.currentStatus === "cancelled") {
+      throw new AppError("This order has already been cancelled.", 400);
+    }
+
+    if (order.currentStatus !== "pending") {
+      throw new AppError("Only pending orders can be cancelled.", 400);
+    }
+
+    await adjustProductStock(order.items, +1)
+
+    order.statusHistory.push({
+      status: "cancelled",
+      note: "Cancelled by user",
+    });
+
+    await order.save();
+
+    sendSuccess(res, "Order cancelled successfully.", { orderNumber });
   } catch (err) {
     next(err);
   }

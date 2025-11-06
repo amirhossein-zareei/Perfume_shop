@@ -3,11 +3,12 @@ const joi = require("joi");
 const {
   createListOptionsValidation,
   createParamsObjectSchema,
+  createBodyObjectSchema,
 } = require("../../../utils/validationHelpers");
 
 const getOrdersValidation = createListOptionsValidation();
 
-const getOrderValidation = createParamsObjectSchema({
+const orderNumberValidation = createParamsObjectSchema({
   orderNumber: joi
     .string()
     .trim()
@@ -24,5 +25,5 @@ const getOrderValidation = createParamsObjectSchema({
 
 module.exports = {
   getOrdersValidation,
-  getOrderValidation,
+  orderNumberValidation,
 };

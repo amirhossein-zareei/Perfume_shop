@@ -22,6 +22,7 @@ const {
 } = require("../../../services/payment/paymentService");
 const AppError = require("../../../utils/AppError");
 const { currency } = require("../../../config/env");
+const { adjustProductStock } = require("../../../services/orderService");
 
 exports.createCheckout = async (req, res, next) => {
   try {
@@ -257,28 +258,11 @@ exports.handlePaymentCallback = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-      const bulkOps = checkout.items
-        .filter((item) => item.volume.type === "bottle")
-        .map((item) => ({
-          updateOne: {
-            filter: {
-              _id: item.product._id,
-              "volumes._id": item.volume._id,
-              "volumes.stock": { $gte: item.quantity },
-            },
-            update: {
-              $inc: { "volumes.$.stock": -item.quantity },
-            },
-          },
-        }));
+      const { result, bulkOps } = await adjustProductStock(checkout.items, -1);
 
-      if (bulkOps.length > 0) {
-        const result = await Product.bulkWrite(bulkOps, { session });
-
-        if (result.modifiedCount !== bulkOps.length) {
-          //TODO برگشت زدن پول به حساب کاربر
-          throw new AppError("Not enough stock for some items.", 409);
-        }
+      if (result.modifiedCount !== bulkOps.length) {
+        //TODO برگشت زدن پول به حساب کاربر
+        throw new AppError("Not enough stock for some items.", 409);
       }
 
       const count = await Order.countDocuments();

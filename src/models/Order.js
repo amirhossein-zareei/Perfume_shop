@@ -64,7 +64,7 @@ const statusHistorySchema = new Schema(
   {
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected", "shipped", "delivered"],
+      enum: ["pending", "approved", "rejected", "shipped", "delivered", "cancelled"],
       default: "pending",
       required: true,
     },
