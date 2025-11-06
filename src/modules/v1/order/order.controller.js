@@ -77,7 +77,7 @@ exports.cancelOrder = async (req, res, next) => {
       throw new AppError("Only pending orders can be cancelled.", 400);
     }
 
-    await adjustProductStock(order.items, +1)
+    await adjustProductStock(order.items, +1);
 
     order.statusHistory.push({
       status: "cancelled",
@@ -87,6 +87,37 @@ exports.cancelOrder = async (req, res, next) => {
     await order.save();
 
     sendSuccess(res, "Order cancelled successfully.", { orderNumber });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getOrdersForAdmin = async (req, res, next) => {
+  try {
+    const totalOrders = await Order.countDocuments();
+
+    const features = new APIFeatures(Order.find(), req.query).sort().paginate();
+
+    const orders = await features.query.select(
+      "orderNumber finalPrice currency statusHistory currentStatus userId shippingAddress.name shippingAddress.phone createdAt"
+    );
+
+    const formattedOrders = orders.map((order) => ({
+      orderNumber: order.orderNumber,
+      finalPrice: order.finalPrice,
+      currency: order.currency,
+      customerName: order.shippingAddress.name,
+      customerPhone: order.shippingAddress.phone,
+      status: order.currentStatus,
+      createdAt: order.createdAt,
+    }));
+
+    const pagination = generatePaginationData(totalOrders, features);
+
+    return sendSuccess(res, "Orders retrieved.", {
+      orders: formattedOrders,
+      pagination,
+    });
   } catch (err) {
     next(err);
   }
