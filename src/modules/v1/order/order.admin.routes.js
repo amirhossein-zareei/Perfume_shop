@@ -6,8 +6,13 @@ const roleGuardMiddleware = require("../../../middlewares/roleGuardMiddleware");
 const {
   getOrdersValidation,
   orderNumberValidation,
+  changeOrderStatusValidation,
 } = require("./order.validation");
-const { getOrdersForAdmin, getOrderForAdmin} = require("./order.controller");
+const {
+  getOrdersForAdmin,
+  getOrderForAdmin,
+  changeOrderStatus,
+} = require("./order.controller");
 
 const router = Router();
 
@@ -16,9 +21,13 @@ router.use(roleGuardMiddleware("ADMIN"));
 
 router.get("/", validate(getOrdersValidation), getOrdersForAdmin);
 
-router.route("/:orderNumber").get(
+router.get("/:orderNumber", validate(orderNumberValidation), getOrderForAdmin);
+
+router.patch(
+  "/:orderNumber/status",
   validate(orderNumberValidation),
-  getOrderForAdmin
+  validate(changeOrderStatusValidation),
+  changeOrderStatus
 );
 
 module.exports = router;

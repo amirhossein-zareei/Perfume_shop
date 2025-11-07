@@ -140,3 +140,36 @@ exports.getOrderForAdmin = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.changeOrderStatus = async (req, res, next) => {
+  try {
+    const { orderNumber } = req.params;
+    const { status, note } = req.body;
+
+    const order = await Order.findOne({
+      orderNumber,
+      "statusHistory.status": { $ne: "cancelled" },
+    });
+
+    if (!order) {
+      throw new AppError("Order not found or has been cancelled.", 404);
+    }
+
+    if (status === "cancelled" && order.currentStatus === "pending") {
+      await adjustProductStock(order.items, +1);
+    }
+
+    order.statusHistory.push({
+      status,
+      note: note
+        ? `${note} \nChanged to ${status} by admin(${req.user.email})`
+        : `Changed to ${status} by admin(${req.user.email})`,
+    });
+
+    await order.save();
+
+    return sendSuccess(res, "Order status updated.", { orderNumber, status });
+  } catch (err) {
+    next(err);
+  }
+};
