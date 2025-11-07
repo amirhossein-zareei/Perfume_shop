@@ -1,4 +1,4 @@
-const { Product, Brand, Category } = require("../../../models");
+const { Product, Brand, Category, Comment } = require("../../../models");
 const APIFeatures = require("../../../utils/apiFeatures");
 const {
   sendSuccess,
@@ -7,6 +7,9 @@ const {
 const { deleteFiles } = require("../../../services/cloudinaryService");
 const AppError = require("../../../utils/AppError");
 const { currency } = require("../../../config/env");
+const {
+  getCommentsWithPagination,
+} = require("../../../services/commentService");
 
 const _buildProductPipeline = (project) => {
   const pipeline = [];
@@ -367,6 +370,69 @@ exports.deleteGalleryImages = async (req, res, next) => {
     await product.save();
 
     return sendSuccess(res, "Gallery deleted successfully.");
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getProductComments = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+
+    const product = await Product.findOne({ slug, isActive: true }).select(
+      "_id"
+    );
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    const { comments, pagination } = await getCommentsWithPagination(
+      { productId: product._id, status: "approved" },
+      req.query,
+      { includeProduct: false }
+    );
+
+    return sendSuccess(res, "", {
+      comments,
+      pagination,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.createProductComment = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { slug } = req.params;
+    const { content, rating } = req.body;
+
+    const product = await Product.findOne({ slug, isActive: true }).select(
+      "_id"
+    );
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    const isCommented = await Comment.exists({
+      userId,
+      productId: product._id,
+    });
+
+    if (isCommented) {
+      throw new AppError("You have already commented on this product.", 400);
+    }
+
+    await Comment.create({
+      content,
+      rating,
+      userId,
+      productId: product._id,
+    });
+
+    return sendSuccess(res, "Comment submitted successfully", {}, 201);
   } catch (err) {
     next(err);
   }

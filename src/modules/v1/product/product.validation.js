@@ -249,9 +249,33 @@ const updateProductValidation = {
   }),
 };
 
+const getProductCommentsValidation = createListOptionsValidation(["newest"]);
+
+const createProductCommentValidation = {
+  body: createBodyObjectSchema({
+    content: joi.string().trim().min(5).max(2000).required().messages({
+      "string.base": "Comment content must be a text",
+      "string.empty": "Comment content is required",
+      "string.min": "Comment content must be at least 5 characters long",
+      "string.max": "Comment content cannot exceed 2000 characters",
+      "any.required": "Comment content is required",
+    }),
+
+    rating: joi.number().integer().min(1).max(5).required().messages({
+      "number.base": "Rating must be a number",
+      "number.integer": "Rating must be a whole number",
+      "number.min": "Rating must be at least 1",
+      "number.max": "Rating cannot be more than 5",
+      "any.required": "Rating is required",
+    }),
+  }),
+};
+
 module.exports = {
   createProductValidation,
   getProductsValidation,
   slugValidation,
   updateProductValidation,
+  getProductCommentsValidation,
+  createProductCommentValidation,
 };
