@@ -26,6 +26,7 @@ const {
   getAndValidateRefreshTokenCookie,
 } = require("../../../utils/cookieHelper");
 const { generateSignedUrl } = require("../../../services/cloudinaryService");
+const { log } = require("winston");
 
 //---- Helper Function ----
 const _handleCaptchaValidation = async (captchaId, captcha) => {
@@ -54,7 +55,7 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, captcha, captchaId } = req.body;
 
-    await _handleCaptchaValidation(captchaId, captcha);
+    // await _handleCaptchaValidation(captchaId, captcha);
 
     const user = await User.exists({ email });
 
@@ -104,7 +105,7 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password, captcha, captchaId } = req.body;
 
-    await _handleCaptchaValidation(captchaId, captcha);
+    // await _handleCaptchaValidation(captchaId, captcha);
 
     const user = await User.findOne({ email }).select("+password");
 
@@ -141,11 +142,11 @@ exports.login = async (req, res, next) => {
 
     return sendSuccess(res, "Login successful", {
       user: {
-      id: user._id,
-      name: user.name,
-      role: user.role,
-      avatarUrl,
-      accessToken,
+        id: user._id,
+        name: user.name,
+        role: user.role,
+        avatarUrl,
+        accessToken,
       },
     });
   } catch (err) {

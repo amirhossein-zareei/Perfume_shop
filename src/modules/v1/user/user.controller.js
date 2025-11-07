@@ -95,21 +95,6 @@ exports.uploadProfileImage = async (req, res, next) => {
   }
 };
 
-exports.getAddresses = async (req, res, next) => {
-  try {
-    const userId = req.user._id;
-
-    const addresses = await Address.find({ userId })
-      .populate("stateId", "name")
-      .populate("cityId", "name")
-      .lean();
-
-    return sendSuccess(res, "", { addresses });
-  } catch (err) {
-    next(err);
-  }
-};
-
 exports.getUserAddresses = async (req, res, next) => {
   try {
     const { userId } = req.params;
@@ -127,28 +112,6 @@ exports.getUserAddresses = async (req, res, next) => {
     return sendSuccess(res, "", {
       username: userExists.name,
       addresses: userAddresses,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.getOrders = async (req, res, next) => {
-  try {
-    const userId = req.user._id;
-
-    const totalOrders = await Order.countDocuments({ userId });
-
-    const features = new APIFeatures(Order.find({ userId }), req.query)
-      .sort()
-      .paginate();
-    const orders = await features.query;
-
-    const pagination = generatePaginationData(totalOrders, features);
-
-    return sendSuccess(res, "", {
-      orders,
-      pagination,
     });
   } catch (err) {
     next(err);

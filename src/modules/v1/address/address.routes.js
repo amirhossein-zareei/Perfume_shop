@@ -8,6 +8,7 @@ const {
 } = require("./address.validation");
 const {
   createAddress,
+  getAddresses,
   getAddress,
   updateAddress,
   deleteAddress,
@@ -18,7 +19,10 @@ const router = Router();
 
 router.use(auth);
 
-router.route("/").post(validate(createAddressValidation), createAddress);
+router
+  .route("/")
+  .post(validate(createAddressValidation), createAddress)
+  .get(getAddresses);
 
 router
   .route("/:addressId")
@@ -28,9 +32,6 @@ router
     validateObjectIdMiddleware("addressId"),
     updateAddress
   )
-  .delete(
-    validateObjectIdMiddleware("addressId"),
-    deleteAddress
-  );
+  .delete(validateObjectIdMiddleware("addressId"), deleteAddress);
 
 module.exports = router;

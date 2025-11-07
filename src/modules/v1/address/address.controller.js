@@ -69,6 +69,21 @@ exports.createAddress = async (req, res, next) => {
   }
 };
 
+exports.getAddresses = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const addresses = await Address.find({ userId })
+      .populate("stateId", "name")
+      .populate("cityId", "name")
+      .lean();
+
+    return sendSuccess(res, "", { addresses });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getAddress = async (req, res, next) => {
   try {
     const address = await _checkAddressAccess(req.user, req.params.addressId);

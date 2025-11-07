@@ -6,6 +6,7 @@ const errorHandler = require("./middlewares/errorHandlerMiddleware");
 const AppError = require("./utils/AppError");
 const authRouter = require("./modules/v1/auth/auth.routes");
 const userRouter = require("./modules/v1/user/user.routes");
+const userAdminRouter = require("./modules/v1/user/user.admin.routes.js");
 const brandRouter = require("./modules/v1/brand/brand.routes");
 const categoryRouter = require("./modules/v1/category/category.routes");
 const addressRouter = require("./modules/v1/address/address.routes.js");
@@ -28,6 +29,7 @@ app.use(cookieParser());
 //* Routers
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/admin/users", userAdminRouter);
 app.use("/api/v1/brands", brandRouter);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/addresses", addressRouter);

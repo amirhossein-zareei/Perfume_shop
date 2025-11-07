@@ -17,4 +17,7 @@ router.get(
   getPublicProduct
 );
 
+// router.get("/:slug/comments")
+// router.post("/:slug/comment")
+
 module.exports = router;
