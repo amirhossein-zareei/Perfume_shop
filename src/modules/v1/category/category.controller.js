@@ -39,7 +39,12 @@ exports.createCategory = async (req, res, next) => {
 
     await newCategory.save();
 
-    return sendSuccess(res, "Category created successfully.", newCategory, 201);
+    return sendSuccess(
+      res,
+      "Category created successfully.",
+      { category: newCategory },
+      201
+    );
   } catch (err) {
     next(err);
   }
@@ -73,11 +78,9 @@ exports.getCategories = async (req, res, next) => {
       }
     });
 
-    return sendSuccess(
-      res,
-      "Categories retrieved successfully.",
-      nestedCategories
-    );
+    return sendSuccess(res, "Categories retrieved successfully.", {
+      categories: nestedCategories,
+    });
   } catch (err) {
     next(err);
   }
@@ -90,7 +93,7 @@ exports.getAllCategoriesForAdmin = async (req, res, next) => {
     const features = new APIFeatures(Category.find(), req.query)
       .sort()
       .paginate();
-      
+
     const categories = await features.query
       .select("name slug isActive parentId icon.url")
       .populate("parentId", "name")
@@ -117,7 +120,7 @@ exports.getCategory = async (req, res, next) => {
       throw new AppError("Category not found.", 404);
     }
 
-    return sendSuccess(res, "", category);
+    return sendSuccess(res, "", { category });
   } catch (err) {
     next(err);
   }
@@ -190,7 +193,9 @@ exports.updatedCategory = async (req, res, next) => {
 
     const updatedCategory = await category.save();
 
-    return sendSuccess(res, "Category updated successfully.", updatedCategory);
+    return sendSuccess(res, "Category updated successfully.", {
+      category: updatedCategory,
+    });
   } catch (err) {
     next(err);
   }

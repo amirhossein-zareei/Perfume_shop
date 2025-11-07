@@ -89,7 +89,12 @@ exports.register = async (req, res, next) => {
       email: newUser.email,
     });
 
-    return sendSuccess(res, "User registered successfully", userToSend, 201);
+    return sendSuccess(
+      res,
+      "User registered successfully",
+      { user: userToSend },
+      201
+    );
   } catch (err) {
     next(err);
   }
@@ -135,11 +140,13 @@ exports.login = async (req, res, next) => {
     const avatarUrl = generateSignedUrl(user.avatarPublicId);
 
     return sendSuccess(res, "Login successful", {
+      user: {
       id: user._id,
       name: user.name,
       role: user.role,
       avatarUrl,
       accessToken,
+      },
     });
   } catch (err) {
     next(err);
@@ -255,10 +262,10 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { resetToken } = req.params;
+    const { token } = req.params;
     const { newPassword } = req.body;
 
-    const userId = await passwordResetTokenHandler.verify(resetToken);
+    const userId = await passwordResetTokenHandler.verify(token);
 
     const user = await User.findById(userId);
 
@@ -274,7 +281,7 @@ exports.resetPassword = async (req, res, next) => {
     user.tokenVersion = ++user.tokenVersion;
     await user.save();
 
-    await passwordResetTokenHandler.delete(resetToken);
+    await passwordResetTokenHandler.delete(token);
 
     return sendSuccess(res, "Your password has been reset successfully");
   } catch (err) {

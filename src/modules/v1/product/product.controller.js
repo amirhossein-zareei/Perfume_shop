@@ -124,7 +124,12 @@ exports.createProduct = async (req, res, next) => {
     const newProduct = new Product(fieldsToNewProduct);
     await newProduct.save();
 
-    return sendSuccess(res, "Product created successfully", newProduct, 201);
+    return sendSuccess(
+      res,
+      "Product created successfully",
+      { product: newProduct },
+      201
+    );
   } catch (err) {
     next(err);
   }
@@ -270,7 +275,7 @@ exports.updateProduct = async (req, res, next) => {
     product.set(fieldsToUpdate);
     await product.save();
 
-    return sendSuccess(res, "", product);
+    return sendSuccess(res, "", { product });
   } catch (err) {
     next(err);
   }
@@ -283,7 +288,7 @@ exports.activateProduct = async (req, res, next) => {
     const product = await _updateProductActiveStatus(slug, true);
     product.isActive = true;
 
-    return sendSuccess(res, "Product activated successfully.", product);
+    return sendSuccess(res, "Product activated successfully.", { product });
   } catch (err) {
     next(err);
   }
@@ -296,7 +301,7 @@ exports.deactivateProduct = async (req, res, next) => {
     let product = await _updateProductActiveStatus(slug, false);
     product.isActive = false;
 
-    return sendSuccess(res, "Product deactivated successfully.", product);
+    return sendSuccess(res, "Product deactivated successfully.", { product });
   } catch (err) {
     next(err);
   }
@@ -333,11 +338,9 @@ exports.addGalleryImages = async (req, res, next) => {
     product.galleryImages = newGallery;
     await product.save();
 
-    return sendSuccess(
-      res,
-      "Gallery updated successfully.",
-      product.galleryImages
-    );
+    return sendSuccess(res, "Gallery updated successfully.", {
+      galleryImages: product.galleryImages,
+    });
   } catch (err) {
     next(err);
   }

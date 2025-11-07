@@ -107,7 +107,9 @@ exports.changeCommentStatus = async (req, res, next) => {
       });
     }
 
-    return sendSuccess(res, "Comment updated successfully.", comment);
+    return sendSuccess(res, "Comment updated successfully.", {
+      comment: comment.toObject(),
+    });
   } catch (err) {
     next(err);
   }

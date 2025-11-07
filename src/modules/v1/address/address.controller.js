@@ -58,7 +58,12 @@ exports.createAddress = async (req, res, next) => {
       longitude,
     });
 
-    return sendSuccess(res, "Address created successfully.", newAddress, 201);
+    return sendSuccess(
+      res,
+      "Address created successfully.",
+      { address: newAddress },
+      201
+    );
   } catch (err) {
     next(err);
   }
@@ -68,7 +73,7 @@ exports.getAddress = async (req, res, next) => {
   try {
     const address = await _checkAddressAccess(req.user, req.params.addressId);
 
-    return sendSuccess(res, "", address);
+    return sendSuccess(res, "", { address });
   } catch (err) {
     next(err);
   }
@@ -100,7 +105,9 @@ exports.updateAddress = async (req, res, next) => {
     Object.assign(address, req.body);
     const updatedAddress = await address.save();
 
-    return sendSuccess(res, "Address updated successfully.", updatedAddress);
+    return sendSuccess(res, "Address updated successfully.", {
+      address: updatedAddress,
+    });
   } catch (err) {
     next(err);
   }

@@ -19,7 +19,7 @@ exports.getMe = (req, res, next) => {
   user.avatarUrl = avatarUrl;
   delete user.avatarPublicId;
 
-  return sendSuccess(res, "User profile retrieved successfully.", user);
+  return sendSuccess(res, "User profile retrieved successfully.", { user });
 };
 
 exports.deleteMe = async (req, res, next) => {
@@ -89,7 +89,7 @@ exports.uploadProfileImage = async (req, res, next) => {
     delete userObject.avatarPublicId;
     userObject.avatarUrl = imageUrl;
 
-    return sendSuccess(res, "", userObject);
+    return sendSuccess(res, "", { user: userObject });
   } catch (err) {
     next(err);
   }
@@ -104,7 +104,7 @@ exports.getAddresses = async (req, res, next) => {
       .populate("cityId", "name")
       .lean();
 
-    return sendSuccess(res, "", addresses);
+    return sendSuccess(res, "", { addresses });
   } catch (err) {
     next(err);
   }
@@ -197,7 +197,7 @@ exports.getUser = async (req, res, next) => {
     targetUser.avatarUrl = avatarUrl;
     delete targetUser.avatarPublicId;
 
-    return sendSuccess(res, "", targetUser);
+    return sendSuccess(res, "", { user: targetUser });
   } catch (err) {
     next(err);
   }
@@ -220,11 +220,9 @@ exports.changeRole = async (req, res, next) => {
       throw new AppError("User not found.", 404);
     }
 
-    return sendSuccess(
-      res,
-      "User role has been updated successfully.",
-      updatedUser
-    );
+    return sendSuccess(res, "User role has been updated successfully.", {
+      user: updatedUser,
+    });
   } catch (err) {
     next(err);
   }
@@ -246,7 +244,9 @@ exports.banUser = async (req, res, next) => {
       throw new AppError("User not found.", 404);
     }
 
-    return sendSuccess(res, "User has been banned successfully.", bannedUser);
+    return sendSuccess(res, "User has been banned successfully.", {
+      user: bannedUser,
+    });
   } catch (err) {
     next(err);
   }
@@ -268,11 +268,9 @@ exports.unbanUser = async (req, res, next) => {
       throw new AppError("User not found.", 404);
     }
 
-    return sendSuccess(
-      res,
-      "User has been unbanned successfully.",
-      unbannedUser
-    );
+    return sendSuccess(res, "User has been unbanned successfully.", {
+      user: unbannedUser,
+    });
   } catch (err) {
     next(err);
   }
@@ -294,11 +292,9 @@ exports.reactivateUser = async (req, res, next) => {
       throw new AppError("User not found.", 404);
     }
 
-    return sendSuccess(
-      res,
-      "User has been reactivated successfully.",
-      reactivatedUser
-    );
+    return sendSuccess(res, "User has been reactivated successfully.", {
+      user: reactivatedUser,
+    });
   } catch (err) {
     next(err);
   }

@@ -39,7 +39,6 @@ router
 
 router.post(
   "/me/avatar",
-
   uploadAvatar.single("profileImage"),
   uploadProfileImage
 );

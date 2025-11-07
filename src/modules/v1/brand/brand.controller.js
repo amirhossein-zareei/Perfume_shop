@@ -34,7 +34,12 @@ exports.createBrand = async (req, res, next) => {
 
     await newBrand.save();
 
-    return sendSuccess(res, "Brand created successfully.", newBrand, 201);
+    return sendSuccess(
+      res,
+      "Brand created successfully.",
+      { brand: newBrand.toObject() },
+      201
+    );
   } catch (err) {
     next(err);
   }
@@ -68,7 +73,7 @@ exports.getBrand = async (req, res, next) => {
       throw new AppError("Brand not found.", 404);
     }
 
-    return sendSuccess(res, "", brand);
+    return sendSuccess(res, "", { brand });
   } catch (err) {
     next(err);
   }
@@ -86,7 +91,7 @@ exports.deleteBrand = async (req, res, next) => {
       throw new AppError("Brand not found.", 404);
     }
 
-    return sendSuccess(res, "Brand deleted successfully.", brand);
+    return sendSuccess(res, "Brand deleted successfully.", { brand });
   } catch (err) {
     next(err);
   }
@@ -128,7 +133,9 @@ exports.updateBrand = async (req, res, next) => {
 
     const updatedBrand = await brand.save();
 
-    return sendSuccess(res, "Brand updated successfully.", updatedBrand);
+    return sendSuccess(res, "Brand updated successfully.", {
+      brand: updatedBrand,
+    });
   } catch (err) {
     next(err);
   }
