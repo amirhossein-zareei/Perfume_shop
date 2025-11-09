@@ -4,7 +4,6 @@ const {
   Checkout,
   Address,
   Order,
-  Product,
   Cart,
   CartItem,
 } = require("../../../models");

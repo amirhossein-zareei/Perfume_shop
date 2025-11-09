@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 
 const errorHandler = require("./middlewares/errorHandlerMiddleware");
 const AppError = require("./utils/AppError");
+const setupSwagger = require("./config/swagger/swagger.js");
 const authRouter = require("./modules/v1/auth/auth.routes");
 const userRouter = require("./modules/v1/user/user.routes");
 const userAdminRouter = require("./modules/v1/user/user.admin.routes.js");
@@ -27,6 +28,9 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 app.use(cors());
 app.use(cookieParser());
+
+//* Swagger UI
+setupSwagger(app);
 
 //* Routers
 app.use("/api/v1/auth", authRouter);

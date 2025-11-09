@@ -5,8 +5,9 @@
   "main": "/src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon ./src/server.js",
-    "seed": "node scripts/seedLocations.js"
+    "dev": "node ./src/config/swagger/swagger.js && nodemon ./src/server.js",
+    "seed": "node scripts/seedLocations.js",
+    "start": "node ./src/config/swagger/swagger.js && node ./src/server.js"
   },
   "keywords": [],
   "author": "",
@@ -32,6 +33,9 @@
     "slugify": "^1.6.6",
     "stripe": "^19.2.0",
     "svg-captcha": "^1.4.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
   },

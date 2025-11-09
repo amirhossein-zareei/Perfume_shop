@@ -69,7 +69,7 @@ const calculateCartTotals = (items) => {
 
 const createItemSnapshot = (item) => {
   if (!item.product || !item.volume) {
-    throw new AppError("");
+    throw new AppError("Product or volume information is missing");
   }
 
   const unitPrice = calculatePrice(item.volume.price, item.product.discount);
