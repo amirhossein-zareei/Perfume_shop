@@ -44,7 +44,7 @@ async function insertCities(cities) {
 
 (async () => {
   try {
-    const countryName = process.argv[2];
+    const countryName = process.argv.slice(2).join(" ");
 
     if (!countryName) {
       console.log(
