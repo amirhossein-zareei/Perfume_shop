@@ -75,3 +75,11 @@ exports.sendVerificationEmail = async ({ name, email, url }) => {
     },
   });
 };
+
+exports.sendContactEmail = async ({ email, message }) => {
+  return sendEmail({
+    to: user.email,
+    subject: "New Contact Message from Perfume Shop",
+    text: `From: ${email}\n\n${message}`,
+  });
+};

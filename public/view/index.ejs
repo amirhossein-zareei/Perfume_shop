@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style/style.css" />
+    <title>Perfume Shop — Backend API Documentation</title>
+    <link rel="icon" href="/images/logo.png" sizes="192x192" type="image/png" />
+  </head>
+  <body data-theme="dark">
+    <header class="site-header">
+      <div class="container">
+        <div class="branding">
+          <span class="logo">Perfume Shop</span>
+          <!-- <p class="tagline">Backend API Documentation & Project Info</p> -->
+        </div>
+        <button
+          class="hamburger"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav class="nav" aria-label="Main navigation">
+          <a href="#features">Key Features</a>
+          <a href="#tech">Tech Stack</a>
+          <a href="#install">Installation</a>
+          <a href="#api">API Docs</a>
+          <a href="#project-structure">Project</a>
+          <button
+            class="theme-toggle"
+            type="button"
+            aria-pressed="true"
+            aria-label="Switch to light mode"
+          >
+            <svg
+              class="theme-icon sun-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="5" />
+              <line x1="12" y1="1" x2="12" y2="3" />
+              <line x1="12" y1="21" x2="12" y2="23" />
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+              <line x1="1" y1="12" x2="3" y2="12" />
+              <line x1="21" y1="12" x2="23" y2="12" />
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            <svg
+              class="theme-icon moon-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" id="hero" aria-labelledby="hero-title">
+        <div class="container">
+          <div class="hero-copy">
+            <h1 id="hero-title">Backend API Documentation & Project Info</h1>
+            <p>
+              A full-featured RESTful backend for a fragrance e-commerce
+              platform. Built with Node.js, Express, MongoDB and Redis —
+              featuring JWT authentication, multi-variant products, Stripe &
+              PayPal integration, and Swagger API documentation.
+            </p>
+            <div class="hero-actions">
+              <a
+                class="btn primary"
+                href="https://github.com/amirhossein-zareei/Perfume_shop"
+                target="_blank"
+                >Github</a
+              >
+              <a class="btn ghost" href="https://perfume-shop-f8ys.onrender.com/api-docs/" target="_blank">Open Swagger</a>
+            </div>
+          </div>
+          <div class="features-slider">
+            <div class="slider-container">
+              <div class="slide active">
+                <div class="slide-icon">🔐</div>
+                <h3>Secure Authentication</h3>
+                <p>JWT with refresh tokens & Redis session management</p>
+              </div>
+              <div class="slide">
+                <div class="slide-icon">🛒</div>
+                <h3>Smart Shopping Cart</h3>
+                <p>Persistent cart with MongoDB & discount system</p>
+              </div>
+              <div class="slide">
+                <div class="slide-icon">💳</div>
+                <h3>Multiple Payments</h3>
+                <p>Stripe & PayPal integration with callbacks</p>
+              </div>
+              <div class="slide">
+                <div class="slide-icon">📦</div>
+                <h3>Order Management</h3>
+                <p>Full lifecycle tracking & stock control</p>
+              </div>
+              <div class="slide">
+                <div class="slide-icon">📚</div>
+                <h3>API Documentation</h3>
+                <p>Interactive Swagger UI with all endpoints</p>
+              </div>
+            </div>
+            <div class="slider-dots">
+              <span class="dot active" data-slide="0"></span>
+              <span class="dot" data-slide="1"></span>
+              <span class="dot" data-slide="2"></span>
+              <span class="dot" data-slide="3"></span>
+              <span class="dot" data-slide="4"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- <section class="collections" id="overview">
+                    <div class="container section-heading">
+                         <h2>Overview</h2>
+                         <p>
+                              Perfume Shop is a complete RESTful API backend tailored for fragrance
+                              e-commerce. It supports multi-variant products, enterprise-grade
+                              security with JWT + Redis, caching, email notifications, and multiple
+                              payment gateways for a production-ready online store backend.
+                         </p>
+                    </div>
+               </section> -->
+
+      <section class="bestsellers" id="features">
+        <div class="container">
+          <div class="bestseller-copy">
+            <h2>Key Features</h2>
+            <ul>
+              <li>
+                Multi-variant product support (sizes/volumes) with per-variant
+                stock & pricing
+              </li>
+              <li>
+                JWT authentication with refresh tokens stored in Redis and
+                refresh rotation
+              </li>
+              <li>
+                Persistent shopping cart (MongoDB), cart synchronization, and
+                discount system
+              </li>
+              <li>
+                Checkout flow with Stripe and PayPal integrations, payment
+                callbacks and verification
+              </li>
+              <li>
+                Order lifecycle (pending → processing → shipped → delivered) and
+                stock adjustments
+              </li>
+              <li>
+                Admin features: user/product/order management, comment
+                moderation, role-based access
+              </li>
+              <li>
+                CAPTCHA protection, Nodemailer email templates, Cloudinary image
+                uploads
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="story" id="tech">
+        <div class="container">
+          <h2>Tech Stack</h2>
+          <p>
+            <strong>Core:</strong> Node.js + Express.js<br />
+            <strong>Database:</strong> MongoDB (Mongoose)<br />
+            <strong>Cache/Session:</strong> Redis<br />
+            <strong>Auth:</strong> JWT + bcrypt<br />
+            <strong>Validation:</strong> Joi<br />
+            <strong>Payments:</strong> Stripe & PayPal<br />
+            <strong>Storage:</strong> Cloudinary<br />
+            <strong>Docs:</strong> Swagger UI<br />
+            <strong>Utilities:</strong> Winston (logging), svg-captcha, multer
+          </p>
+        </div>
+      </section>
+
+      <section class="testimonials" id="install">
+        <div class="container section-heading">
+          <h2>Installation</h2>
+          <ol>
+            <li>
+              <strong>Clone the repository:</strong>
+              <pre>
+git clone https://github.com/amirhossein-zareei/Perfume_shop.git
+cd Perfume_shop</pre
+              >
+            </li>
+            <li>
+              <strong>Install dependencies:</strong>
+              <pre>
+npm install
+# or
+yarn install</pre
+              >
+            </li>
+            <li>
+              <strong>Copy environment template and configure:</strong>
+              <pre>cp .env.example .env</pre>
+              <p>
+                Edit <code>.env</code> with your MongoDB, Redis, Cloudinary,
+                Stripe/PayPal, and email credentials.
+              </p>
+            </li>
+            <li>
+              <strong>Seed geographic location data</strong> (required for
+              addresses & checkout):
+              <pre>npm run seed &lt;countryName&gt;</pre>
+            </li>
+            <li>
+              <strong>Run in development:</strong>
+              <pre>npm run dev</pre>
+              <p>
+                Visit <code>http://localhost:{port}/api-docs</code> for local
+                Swagger UI.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="newsletter" id="api">
+        <div class="container">
+          <h2>API Documentation</h2>
+          <p>
+            Interactive Swagger docs are available at:
+            <a
+              href="https://perfume-shop-f8ys.onrender.com/api-docs/"
+              target="_blank"
+              rel="noopener"
+              class="link"
+              >Live Swagger Documentation</a
+            >
+          </p>
+
+          <h3>Quick Endpoints Overview</h3>
+          <div class="api-endpoints">
+            <div class="endpoint-group">
+              <h4>Auth</h4>
+              <pre>
+POST   /api/v1/auth/register
+POST   /api/v1/auth/login
+POST   /api/v1/auth/logout
+POST   /api/v1/auth/refresh-token
+GET    /api/v1/auth/captcha
+POST   /api/v1/auth/forgot-password
+POST   /api/v1/auth/reset-password/:token</pre
+              >
+            </div>
+
+            <div class="endpoint-group">
+              <h4>Products</h4>
+              <pre>
+GET    /api/v1/products
+GET    /api/v1/products/:slug
+POST   /api/v1/admin/products
+PUT    /api/v1/admin/products/:slug
+DELETE /api/v1/admin/products/:slug</pre
+              >
+            </div>
+
+            <div class="endpoint-group">
+              <h4>Cart & Checkout & Orders</h4>
+              <pre>
+GET/POST/PATCH/DELETE    /api/v1/cart
+POST/GET/PATCH/DELETE    /api/v1/checkout
+POST /api/v1/checkout/payment
+GET  /api/v1/checkout/callback
+GET  /api/v1/orders
+GET  /api/v1/orders/:orderNumber</pre
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="collections" id="project-structure">
+        <div class="container section-heading">
+          <h2>Project Structure</h2>
+          <div class="markdown-content">
+            <pre><code class="language-markdown"># Perfume Shop - Backend API
+
+## 📁 Project Structure
+
+```
+Perfume_shop/
+├── src/
+│   ├── config/         # Database, Redis, Cloudinary, Swagger configuration
+│   ├── middlewares/    # Authentication, validation, error handling
+│   ├── models/         # MongoDB models (User, Product, Order, etc.)
+│   ├── modules/v1/     # API modules
+│   │   ├── auth/       # Authentication & authorization
+│   │   ├── user/       # User management
+│   │   ├── product/    # Product catalog
+│   │   ├── cart/       # Shopping cart
+│   │   ├── checkout/   # Checkout process
+│   │   ├── order/      # Order management
+│   │   ├── comment/    # Reviews & comments
+│   │   └── address/    # User addresses
+│   ├── services/       # Business logic & external services
+│   ├── templates/      # Email templates (HTML/Text)
+│   ├── utils/          # Helper functions & utilities
+│   ├── app.js          # Express app configuration
+│   └── server.js       # Server entry point
+├── data/               # Static data & seeds
+├── scripts/            # Utility scripts (seedLocations.js)
+├── .env.example        # Environment variables template
+├── package.json        # Dependencies & scripts
+└── README.md           # Project documentation
+```
+
+## 🚀 Quick Start
+
+1. Clone & Install
+2. Configure environment (.env)
+3. Seed location data
+4. Run development server
+5. Access Swagger docs at `/api-docs`
+</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section class="contact" id="authors">
+        <div class="container">
+          <h2>Contact Me</h2>
+
+          <form
+            class="contact-form"
+            id="contactForm"
+            data-endpoint="/api/v1/contact"
+          >
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                placeholder="your@email.com"
+              />
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea
+                id="message"
+                name="message"
+                rows="5"
+                required
+                placeholder="Your message..."
+              ></textarea>
+            </div>
+            <button type="submit" class="btn primary">Send Message</button>
+            <p class="form-status"></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small
+          >&copy; 2025 Perfume Shop by Amirhossein Zareei. All rights
+          reserved.</small
+        >
+        <small
+          >Design by Mohammad Mahdi Ghorbani
+          <a
+            href="https://github.com/mahdi-delta"
+            target="_blank"
+            rel="noopener"
+            >( GitHub )</a
+          ></small
+        >
+      </div>
+    </footer>
+
+    <script src="/functions/function.js"></script>
+  </body>
+</html>

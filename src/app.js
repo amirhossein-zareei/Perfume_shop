@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const path = require("path");
 
 const errorHandler = require("./middlewares/errorHandlerMiddleware");
 const AppError = require("./utils/AppError");
@@ -20,6 +21,7 @@ const cartRouter = require("./modules/v1/cart/cart.routes.js");
 const checkoutRouter = require("./modules/v1/checkout/checkout.routes.js");
 const orderRouter = require("./modules/v1/order/order.routes.js");
 const orderAdminRouter = require("./modules/v1/order/order.admin.routes.js");
+const contactRouter = require("./modules/v1/contact/contact.routes.js");
 
 const app = express();
 
@@ -29,8 +31,17 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use(cookieParser());
 
+//* View Engine
+app.use(express.static(path.join(__dirname, "..", "public", "view")));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "..", "public", "view"));
+
 //* Swagger UI
 setupSwagger(app);
+
+app.get("/", (req, res) => {
+  res.render("index");
+});
 
 //* Routers
 app.use("/api/v1/auth", authRouter);
@@ -48,6 +59,7 @@ app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/checkout", checkoutRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/admin/orders", orderAdminRouter);
+app.use("/api/v1/contact", contactRouter);
 
 //* 404 Handler
 app.use((req, res, next) => {

@@ -11,7 +11,7 @@
 [![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=JSON%20web%20tokens&logoColor=white)](https://jwt.io/)
 [![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)](https://swagger.io/)
 
-**[Live Demo](https://perfume-shop-f8ys.onrender.com/api-docs/)** • **[Features](#key-features)** • **[Installation](#installation)** • **[API Documentation](#api-documentation)**
+**[Live Demo](https://perfume-shop-f8ys.onrender.com/)** • **[Features](#key-features)** • **[Installation](#installation)**
 
 
 
@@ -32,8 +32,6 @@
 - [Core Modules](#core-modules)
 - [Security Features](#security-features)
 - [Payment Integration](#payment-integration)
-- [License](#license)
-
 ---
 
 ## Overview
