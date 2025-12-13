@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 
 const errorHandler = require("./middlewares/errorHandlerMiddleware");
+const { createRateLimiter } = require("./middlewares/rateLimiterMiddleware.js");
 const AppError = require("./utils/AppError");
 const setupSwagger = require("./config/swagger/swagger.js");
 const authRouter = require("./modules/v1/auth/auth.routes");
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
 app.use(cors());
 app.use(cookieParser());
+app.use(createRateLimiter(15, 300));
 
 //* View Engine
 app.use(express.static(path.join(__dirname, "..", "public", "view")));

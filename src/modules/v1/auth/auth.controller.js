@@ -55,7 +55,7 @@ exports.register = async (req, res, next) => {
   try {
     const { name, email, password, captcha, captchaId } = req.body;
 
-    // await _handleCaptchaValidation(captchaId, captcha);
+    await _handleCaptchaValidation(captchaId, captcha);
 
     const user = await User.exists({ email });
 
@@ -105,7 +105,7 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password, captcha, captchaId } = req.body;
 
-    // await _handleCaptchaValidation(captchaId, captcha);
+    await _handleCaptchaValidation(captchaId, captcha);
 
     const user = await User.findOne({ email }).select("+password");
 

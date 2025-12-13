@@ -3,6 +3,9 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const {
+  createRateLimiter,
+} = require("../../../middlewares/rateLimiterMiddleware");
+const {
   registerValidation,
   loginValidation,
   changePasswordValidation,
@@ -34,8 +37,10 @@ const router = Router();
  *     responses:
  *       '200':
  *         description: CAPTCHA generated successfully
+ *       '429':
+ *         description: Too many requests, please try again later
  */
-router.get("/captcha", getCaptcha);
+router.get("/captcha", createRateLimiter(10, 10), getCaptcha);
 
 /**
  * @swagger
@@ -76,8 +81,15 @@ router.get("/captcha", getCaptcha);
  *         description: Validation error or invalid CAPTCHA
  *       '409':
  *         description: Email already registered
+ *       '429':
+ *         description: Too many requests, please try again later
  */
-router.post("/register", validate(registerValidation), register);
+router.post(
+  "/register",
+  createRateLimiter(5, 5),
+  validate(registerValidation),
+  register
+);
 
 /**
  * @swagger
@@ -112,8 +124,15 @@ router.post("/register", validate(registerValidation), register);
  *         description: Invalid email or password
  *       '403':
  *         description: Account banned or deactivated
+ *       '429':
+ *         description: Too many requests, please try again later
  */
-router.post("/login", validate(loginValidation), login);
+router.post(
+  "/login",
+  createRateLimiter(5, 5),
+  validate(loginValidation),
+  login
+);
 
 /**
  * @swagger
@@ -144,8 +163,10 @@ router.post("/logout", auth, logout);
  *         description: Invalid or expired refresh token
  *       '403':
  *         description: User account issues
+ *       '429':
+ *         description: Too many requests, please try again later
  */
-router.post("/refresh-token", refreshToken);
+router.post("/refresh-token", createRateLimiter(15, 10), refreshToken);
 
 /**
  * @swagger
@@ -179,9 +200,12 @@ router.post("/refresh-token", refreshToken);
  *         description: Old password is incorrect
  *       '401':
  *         description: Authentication required
+ *       '429':
+ *         description: Too many requests, please try again later
  */
 router.patch(
   "/change-password",
+  createRateLimiter(15, 5),
   auth,
   validate(changePasswordValidation),
   changePassword
@@ -207,9 +231,12 @@ router.patch(
  *     responses:
  *       '200':
  *         description: Reset link sent (if account exists)
+ *       '429':
+ *         description: Too many requests, please try again later
  */
 router.post(
   "/forgot-password",
+  createRateLimiter(15, 5),
   validate(forgotPasswordValidation),
   forgotPassword
 );
@@ -246,9 +273,12 @@ router.post(
  *         description: Password has been reset successfully
  *       '400':
  *         description: Invalid or expired reset token
+ *       '429':
+ *         description: Too many requests, please try again later
  */
 router.post(
   "/reset-password/:token",
+  createRateLimiter(15, 5),
   validate(resetPasswordValidation),
   resetPassword
 );
@@ -268,8 +298,15 @@ router.post(
  *         description: Email already verified
  *       '401':
  *         description: Authentication required
+ *       '429':
+ *         description: Too many requests, please try again later
  */
-router.post("/resend-verification", auth, resendVerification);
+router.post(
+  "/resend-verification",
+  createRateLimiter(15, 5),
+  auth,
+  resendVerification
+);
 
 /**
  * @swagger
@@ -290,9 +327,12 @@ router.post("/resend-verification", auth, resendVerification);
  *         description: Invalid or expired verification token
  *       '403':
  *         description: Account banned or deactivated
+ *       '429':
+ *         description: Too many requests, please try again later
  */
 router.post(
   "/verify-email/:token",
+  createRateLimiter(15, 5),
   validate(verifyEmailValidation),
   verifyEmail
 );
