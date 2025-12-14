@@ -1,4 +1,4 @@
-const { Product, Brand, Category, Comment } = require("../../../models");
+const { Product, Brand, Category, Comment, Order } = require("../../../models");
 const APIFeatures = require("../../../utils/apiFeatures");
 const {
   sendSuccess,
@@ -423,6 +423,19 @@ exports.createProductComment = async (req, res, next) => {
 
     if (isCommented) {
       throw new AppError("You have already commented on this product.", 400);
+    }
+
+    const hasPurchased = await Order.exists({
+      userId: req.user._id,
+      "items.productId": product._id,
+      "statusHistory.status": "delivered",
+    });
+
+    if (!hasPurchased) {
+      throw new AppError(
+        "You can only comment on products you have purchased and received.",
+        403
+      );
     }
 
     await Comment.create({
