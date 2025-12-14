@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const helmet = require("helmet");
+const hpp = require("hpp");
 
 const errorHandler = require("./middlewares/errorHandlerMiddleware");
 const { createRateLimiter } = require("./middlewares/rateLimiterMiddleware.js");
@@ -26,12 +28,14 @@ const contactRouter = require("./modules/v1/contact/contact.routes.js");
 
 const app = express();
 
-app.use(express.json({ limit: "30mb" }));
-app.use(express.urlencoded({ limit: "30mb", extended: true }));
-
+app.use(helmet());
+app.use(hpp());
 app.use(cors());
-app.use(cookieParser());
 app.use(createRateLimiter(15, 300));
+
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ limit: "30mb", extended: true }));
+app.use(cookieParser());
 
 //* View Engine
 app.use(express.static(path.join(__dirname, "..", "public", "view")));
