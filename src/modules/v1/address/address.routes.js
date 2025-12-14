@@ -2,6 +2,9 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const {
+  requireEmailVerification,
+} = require("../../../middlewares/requireEmailVerification");
+const {
   createAddressValidation,
   updateAddressValidation,
 } = require("./address.validation");
@@ -17,6 +20,7 @@ const validateObjectIdMiddleware = require("../../../middlewares/validateObjectI
 const router = Router();
 
 router.use(auth);
+router.use(requireEmailVerification);
 
 /**
  * @swagger

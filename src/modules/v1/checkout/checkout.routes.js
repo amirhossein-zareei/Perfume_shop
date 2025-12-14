@@ -3,6 +3,9 @@ const { Router } = require("express");
 const validate = require("../../../middlewares/validateMiddleware");
 const { auth } = require("../../../middlewares/authMiddleware");
 const {
+  requireEmailVerification,
+} = require("../../../middlewares/requireEmailVerification");
+const {
   updateCheckoutValidation,
   verifyPaymentValidation,
 } = require("./checkout.validation");
@@ -18,6 +21,7 @@ const {
 const router = Router();
 
 router.use(auth);
+router.use(requireEmailVerification);
 
 /**
  * @swagger
