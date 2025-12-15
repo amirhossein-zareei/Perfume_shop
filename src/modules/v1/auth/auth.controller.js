@@ -26,7 +26,6 @@ const {
   getAndValidateRefreshTokenCookie,
 } = require("../../../utils/cookieHelper");
 const { generateSignedUrl } = require("../../../services/cloudinaryService");
-const { log } = require("winston");
 
 //---- Helper Function ----
 const _handleCaptchaValidation = async (captchaId, captcha) => {
@@ -86,8 +85,10 @@ exports.register = async (req, res, next) => {
     delete userToSend.password;
 
     logger.info("User registered successfully", {
-      userId: newUser._id,
-      email: newUser.email,
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user._id,
     });
 
     return sendSuccess(
@@ -140,6 +141,13 @@ exports.login = async (req, res, next) => {
 
     const avatarUrl = generateSignedUrl(user.avatarPublicId);
 
+    logger.info("User login successful", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user._id,
+    });
+
     return sendSuccess(res, "Login successful", {
       user: {
         id: user._id,
@@ -157,6 +165,13 @@ exports.login = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   try {
     await performLogout(req, res);
+
+    logger.info("User logged out successfully", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: req.user._id,
+    });
 
     return sendSuccess(res, "Successfully logged out.");
   } catch (err) {
@@ -204,6 +219,13 @@ exports.refreshToken = async (req, res, next) => {
 
     await revokeRefreshToken(refreshTokenFromCookie);
 
+    logger.info("Refresh token rotated successfully", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user._id,
+    });
+
     return sendSuccess(res, "Tokens refreshed successfully.", {
       accessToken: newAccessToken,
     });
@@ -230,6 +252,13 @@ exports.changePassword = async (req, res, next) => {
     user.tokenVersion = ++user.tokenVersion;
     await user.save();
 
+    logger.info("Password changed successfully", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user._id,
+    });
+
     return sendSuccess(res, "Password changed successfully.");
   } catch (err) {
     next(err);
@@ -252,6 +281,14 @@ exports.forgotPassword = async (req, res, next) => {
         url: resetUrl,
       });
     }
+
+    logger.info("Password reset requested", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user?._id,
+    });
+
     return sendSuccess(
       res,
       "If an account with that email address exists, a password reset link has been sent."
@@ -284,6 +321,13 @@ exports.resetPassword = async (req, res, next) => {
 
     await passwordResetTokenHandler.delete(token);
 
+    logger.info("Password reset successfully", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user._id,
+    });
+
     return sendSuccess(res, "Your password has been reset successfully");
   } catch (err) {
     next(err);
@@ -307,6 +351,13 @@ exports.resendVerification = async (req, res, next) => {
       name,
       email,
       url: verifyUrl,
+    });
+
+    logger.info("Verification email resent", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: userId,
     });
 
     return sendSuccess(
@@ -348,6 +399,13 @@ exports.verifyEmail = async (req, res, next) => {
     await user.save();
 
     await emailVerificationTokenHandler.delete(token);
+
+    logger.info("Email verified successfully", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: user._id,
+    });
 
     return sendSuccess(res, "Your email has been verified successfully");
   } catch (err) {

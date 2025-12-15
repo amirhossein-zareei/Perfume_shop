@@ -10,6 +10,7 @@ const {
   generateSignedUrl,
 } = require("../../../services/cloudinaryService");
 const APIFeatures = require("../../../utils/apiFeatures");
+const logger = require("../../../utils/logger");
 
 exports.getMe = (req, res, next) => {
   const user = req.user;
@@ -33,6 +34,13 @@ exports.deleteMe = async (req, res, next) => {
     );
 
     await performLogout(req, res);
+
+    logger.info("User account deactivated", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: userId,
+    });
 
     return sendSuccess(
       res,
@@ -207,6 +215,14 @@ exports.banUser = async (req, res, next) => {
       throw new AppError("User not found.", 404);
     }
 
+    logger.info("User banned", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      adminId: req.user._id,
+      userId: userId,
+    });
+
     return sendSuccess(res, "User has been banned successfully.", {
       user: bannedUser,
     });
@@ -230,6 +246,14 @@ exports.unbanUser = async (req, res, next) => {
     if (!unbannedUser) {
       throw new AppError("User not found.", 404);
     }
+
+    logger.info("User unbanned", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      adminId: req.user._id,
+      userId: userId,
+    });
 
     return sendSuccess(res, "User has been unbanned successfully.", {
       user: unbannedUser,

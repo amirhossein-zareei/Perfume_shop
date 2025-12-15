@@ -6,6 +6,7 @@ const {
   generatePaginationData,
 } = require("../../../utils/apiResponse");
 const AppError = require("../../../utils/AppError");
+const logger = require("../../../utils/logger");
 
 exports.getOrders = async (req, res, next) => {
   try {
@@ -86,7 +87,15 @@ exports.cancelOrder = async (req, res, next) => {
 
     await order.save();
 
-    sendSuccess(res, "Order cancelled successfully.", { orderNumber });
+    logger.info("Order cancelled successfully", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: userId,
+      orderNumber: orderNumber,
+    });
+
+    return sendSuccess(res, "Order cancelled successfully.", { orderNumber });
   } catch (err) {
     next(err);
   }
@@ -167,6 +176,15 @@ exports.changeOrderStatus = async (req, res, next) => {
     });
 
     await order.save();
+
+    logger.info("Order status updated", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: req.user._id,
+      orderNumber: orderNumber,
+      newStatus: status,
+    });
 
     return sendSuccess(res, "Order status updated.", { orderNumber, status });
   } catch (err) {

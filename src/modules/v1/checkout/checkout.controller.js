@@ -1,12 +1,6 @@
 const mongoose = require("mongoose");
 
-const {
-  Checkout,
-  Address,
-  Order,
-  Cart,
-  CartItem,
-} = require("../../../models");
+const { Checkout, Address, Order, Cart, CartItem } = require("../../../models");
 const {
   getValidatedCartItems,
   calculateCartTotals,
@@ -22,6 +16,7 @@ const {
 const AppError = require("../../../utils/AppError");
 const { currency } = require("../../../config/env");
 const { adjustProductStock } = require("../../../services/orderService");
+const logger = require("../../../utils/logger");
 
 exports.createCheckout = async (req, res, next) => {
   try {
@@ -170,6 +165,13 @@ exports.cancelCheckout = async (req, res, next) => {
     checkout.payment.status = "cancelled";
     await checkout.save();
 
+    logger.info("Checkout session cancelled", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: userId,
+    });
+
     return sendSuccess(res, "Checkout session deleted successfully.");
   } catch (err) {
     next(err);
@@ -200,6 +202,14 @@ exports.initiatePayment = async (req, res, next) => {
 
     checkout.payment.sessionId = paymentData.sessionId;
     await checkout.save();
+
+    logger.info("Payment session initiated", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      userId: userId,
+      paymentSessionId: paymentData.sessionId,
+    });
 
     return sendSuccess(res, "Payment link generated.", {
       paymentUrl: paymentData.paymentUrl,
@@ -298,6 +308,14 @@ exports.handlePaymentCallback = async (req, res, next) => {
 
       await session.commitTransaction();
       session.endSession();
+
+      logger.info("Order created successfully after payment", {
+        method: req.method,
+        url: req.originalUrl,
+        ip: req.ip,
+        userId: userId,
+        orderNumber,
+      });
 
       return sendSuccess(res, "Payment verified and order created.", {
         order: newOrder.toObject(),
