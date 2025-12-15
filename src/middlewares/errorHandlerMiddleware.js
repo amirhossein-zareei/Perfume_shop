@@ -37,9 +37,12 @@ module.exports = async (err, req, res, next) => {
     method: req.method,
     url: req.originalUrl,
     ip: req.ip,
-    stack: err.stack,
     errors: err.errors || null,
   };
+
+  if (!isProduction) {
+    logDetails.stack = err.stack;
+  }
 
   if (statusCode >= 500) {
     logger.error(`${err.message}`, logDetails);
