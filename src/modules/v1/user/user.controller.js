@@ -267,20 +267,31 @@ exports.reactivateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
 
-    const reactivatedUser = await User.findByIdAndUpdate(
-      userId,
-      { isActive: true },
-      { new: true }
-    )
+    const user = await User.findById(userId)
       .select("name email role isActive")
       .lean();
 
-    if (!reactivatedUser) {
+    if (!user) {
       throw new AppError("User not found.", 404);
     }
 
+    if (user.isActive) {
+      throw new AppError("User is already active.", 400);
+    }
+
+    user.isActive = true;
+    await user.save();
+
+    logger.info("User reactivated", {
+      method: req.method,
+      url: req.originalUrl,
+      ip: req.ip,
+      adminId: req.user._id,
+      userId: userId,
+    });
+
     return sendSuccess(res, "User has been reactivated successfully.", {
-      user: reactivatedUser,
+      user,
     });
   } catch (err) {
     next(err);
