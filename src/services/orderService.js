@@ -22,3 +22,30 @@ const adjustProductStock = async (items, operation) => {
 };
 
 module.exports = { adjustProductStock };
+
+Perfume_shop/
+├── __tests__/                    👈 پوشه اصلی تست‌ها
+│   ├── unit/                     👈 تست‌های واحد
+│   │   ├── services/
+│   │   │   ├── cartService.test.js
+│   │   │   ├── orderService.test.js
+│   │   │   └── tokenService.test.js
+│   │   └── utils/
+│   │       ├── apiFeatures.test.js
+│   │       ├── currency.test.js
+│   │       └── validationHelpers.test.js
+│   │
+│   ├── integration/              👈 تست‌های API
+│   │   ├── auth. test.js
+│   │   ├── product.test.js
+│   │   └── order.test.js
+│   │
+│   └── mocks/                    👈 Mock ها
+│       ├── captchaMock.js
+│       └── paymentMock.js
+│
+├── src/
+│   ├── modules/v1/
+│   ├── services/
+│   └── utils/
+└── package.json

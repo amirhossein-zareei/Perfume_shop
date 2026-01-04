@@ -4,7 +4,7 @@
   "description": "",
   "main": "/src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "dev": "node ./src/config/swagger/swagger.js && nodemon ./src/server.js",
     "seed": "node scripts/seedLocations.js",
     "start": "node ./src/config/swagger/swagger.js && node ./src/server.js"
@@ -43,6 +43,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "jest": "^30.2.0",
     "nodemon": "^3.1.10"
   }
 }
